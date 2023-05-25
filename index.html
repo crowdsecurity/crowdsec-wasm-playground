@@ -1,0 +1,100 @@
+<html>  
+    <head>
+        <meta charset="utf-8"/>
+        <script src="wasm_exec.js"></script>
+        <script>
+            const go = new Go();
+            WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+                go.run(result.instance);
+            }).catch( error => {
+                console.log("ouch", error)
+            })
+        </script>
+    </head>
+    <body>
+         <h1> GROK VALIDATION </h1>
+         <textarea id="grok_validation" name="grok_validation" cols="80" rows="20"></textarea>
+         <input id="button" type="submit" name="button" value="validate grok" onclick="validate(grok_validation.value)"/>
+         <textarea id="validation_output" name="validation_output" cols="80" rows="1"></textarea>
+
+         <!-- html boiii -->
+         <h1> GROK RUN </h1>
+         <br>
+         pattern <-> input<br>
+         <textarea id="grok_pattern" name="grok_pattern" cols="80" rows="20"></textarea>
+         <input id="button" type="submit" name="button" value="parse grok" onclick="parse(grok_pattern.value, text_input.value)"/>
+         <textarea id="text_input" name="text_input" cols="80" rows="20"></textarea>
+         <textarea id="grok_result" name="grok_result" cols="80" rows="20"></textarea>
+
+         <!-- css boii -->
+         <h1> GROK DEBUG </h1>
+         <br>
+         pattern <-> input<br>
+         <br>
+         <div id="test_result"></div>
+         <textarea id="test_pattern" name="test_pattern" cols="80" rows="20"></textarea>
+         <input id="button" type="submit" name="button" value="parse grok" onclick="debuggrok(test_pattern.value, test_input.value)"/>
+         <textarea id="test_input" name="test_input" cols="80" rows="20"></textarea>
+         <!--<textarea id="test_result" name="test_result" cols="80" rows="20"></textarea>-->
+    </body>
+    <script>
+
+
+
+
+        var validate = function(input) {
+            validation_output.value = validateGrok(input)
+        }
+        var parse = function(pattern, input) {
+            zz = runGrok(pattern, input)
+            console.log("res => ", zz)
+            console.log("restype => ", typeof zz)
+            zzsr = JSON.stringify(zz)
+            console.log("stringified res => ", zzsr)
+            console.log("sringified resype =>", typeof zzsr)
+            grok_result.value = zzsr
+        }
+
+        var debuggrok = function(pattern, input) {
+            //document.getElementById('test_result').innerHTML = '<h1> lol </h1>';
+
+            ret = debugGrok(pattern, input)
+            idx = ret["__idx"]
+            delete ret["__idx"]
+            error = ret["__error"]
+            delete ret["__error"]
+            start_idx = ret["__idx_start"]
+            delete ret["__idx_start"]
+            end_idx = ret["__idx_end"]
+            delete ret["__idx_end"]
+
+            console.log("idx => ", idx , " type => ", typeof idx)
+            console.log("ret => ", ret , " type => ", typeof ret)
+            console.log("error => ", error , " type => ", typeof error)
+            console.log("start_idx => ", start_idx , " type => ", typeof start_idx)
+            console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
+
+            
+            if (error != "") {
+                document.getElementById('test_result').innerHTML = error;
+                return
+            }
+            if (idx == -1) {
+                z = "<font color='green'> full match </font><br>"
+                z += "<font color='green'>" + JSON.stringify(ret) + "</font>"
+                document.getElementById('test_result').innerHTML = z
+            } else {
+                z = "match until index " + idx + "<br>"
+                z += "(green part of regexp matches) <font color=\"green\">" + pattern.slice(0, idx) + "</font>"
+                z += "<font color=\"red\">" + pattern.slice(idx) + "</font><br>"
+                
+                z += "(green part of input matched) <font color=\"green\">" + input.substring(start_idx, end_idx) + "</font>"
+                z += "<font color=\"red\">" + input.substring(end_idx) + "</font><br>"
+
+                z += "Last match : <br>" + JSON.stringify(ret) + "<br>"
+                document.getElementById('test_result').innerHTML = z;
+            }
+        }
+
+     </script>
+</html>  
