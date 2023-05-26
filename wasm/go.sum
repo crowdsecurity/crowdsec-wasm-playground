@@ -4,6 +4,10 @@ github.com/crowdsecurity/grokky v0.2.2-0.20230524153003-0fde69aa0aad h1:KS0cdE4L
 github.com/crowdsecurity/grokky v0.2.2-0.20230524153003-0fde69aa0aad/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
 github.com/crowdsecurity/grokky v0.2.2-0.20230524192556-01c3b1cc1b97 h1:YRGcAcsJ4PBmoxxcqNUNURtV+2SrziVo45FL2coCw/I=
 github.com/crowdsecurity/grokky v0.2.2-0.20230524192556-01c3b1cc1b97/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
+github.com/crowdsecurity/grokky v0.2.2-0.20230525202037-6b6a1f17f05c h1:lSdyOt2lPscfBBgAbffw2LdYi/6VNqjhBiZTf1XDkmQ=
+github.com/crowdsecurity/grokky v0.2.2-0.20230525202037-6b6a1f17f05c/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
+github.com/crowdsecurity/grokky v0.2.2-0.20230525202910-f1a7636df004 h1:WrzMGbAFkGNq24UQJxYawwwnZen05A4bU9UPIZ8yzb0=
+github.com/crowdsecurity/grokky v0.2.2-0.20230525202910-f1a7636df004/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/magefile/mage v1.14.0 h1:6QDX3g6z1YvJ4olPhT1wksUcSa/V0a1B+pJb73fBjyo=

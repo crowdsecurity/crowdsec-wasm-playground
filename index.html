@@ -67,12 +67,15 @@
             delete ret["__idx_start"]
             end_idx = ret["__idx_end"]
             delete ret["__idx_end"]
+            submatch_indexes = JSON.parse(ret["__submatches_idx"])
+            delete ret["__submatches_idx"]
 
             console.log("idx => ", idx , " type => ", typeof idx)
             console.log("ret => ", ret , " type => ", typeof ret)
             console.log("error => ", error , " type => ", typeof error)
             console.log("start_idx => ", start_idx , " type => ", typeof start_idx)
             console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
+            console.log("submatch indexes => ", submatch_indexes , " type => ", typeof submatch_indexes)
 
             
             if (error != "") {
@@ -84,12 +87,38 @@
                 z += "<font color='green'>" + JSON.stringify(ret) + "</font>"
                 document.getElementById('test_result').innerHTML = z
             } else {
+
                 z = "match until index " + idx + "<br>"
                 z += "(green part of regexp matches) <font color=\"green\">" + pattern.slice(0, idx) + "</font>"
                 z += "<font color=\"red\">" + pattern.slice(idx) + "</font><br>"
                 
-                z += "(green part of input matched) <font color=\"green\">" + input.substring(start_idx, end_idx) + "</font>"
-                z += "<font color=\"red\">" + input.substring(end_idx) + "</font><br>"
+                z += "(green part of input matched) "
+                /*render text properly*/
+                for (i = 0; i < input.length; i++) {
+                    bold = false
+                    console.log("sumatch indexes => ", ret["__submatches_idx"])
+                    for (j = 0; j < submatch_indexes.length; j++) {
+                        if (i >= submatch_indexes[j][0] && i < submatch_indexes[j][1]) {
+                            bold = true
+                            console.log("index %d is in [%d,%d]", i, submatch_indexes[j][0], submatch_indexes[j][1])
+                            z += "<b>"
+                            break
+                        }
+                    }
+
+                    if (i >= start_idx && i < end_idx) {
+                        z += "<font color=\"green\">" + input[i] + "</font>"
+                    } else if (i > end_idx) {
+                        z += "<font color=\"red\">" + input[i] + "</font>"
+                    } 
+                    if (bold == true) {
+                        z += "</b>"
+                    }
+                }
+                z += "<br>"
+
+                // z += "(green part of input matched) <font color=\"green\">" + input.substring(start_idx, end_idx) + "</font>"
+                // z += "<font color=\"red\">" + input.substring(end_idx) + "</font><br>"
 
                 z += "Last match : <br>" + JSON.stringify(ret) + "<br>"
                 document.getElementById('test_result').innerHTML = z;

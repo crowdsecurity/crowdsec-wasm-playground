@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -69,6 +70,10 @@ func validateGrok(this js.Value, args []js.Value) any {
 //toto 1.2.3.4 foobar lol
 //toto 1.2.3.4 foobar lol 42
 
+//^toto %{IP:toto} %{IP:foobar} tutu lol
+//toto 1.2.3.4 5.6.7.8 xxx
+//toto 1.2.3.4 5.6.7.8 tutu lol
+
 func debugGrok(this js.Value, args []js.Value) interface{} {
 	if len(args) != 2 {
 		return map[string]interface{}{"_error": "Invalid no of arguments passed"}
@@ -83,6 +88,7 @@ type PartialMatch struct {
 	Compiles         bool
 	Matches          bool
 	Match            map[string]interface{}
+	SubMatchIndexes  [][]int
 	IdxStart, IdxEnd int
 }
 
@@ -114,6 +120,28 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 			ret.Match[k] = v
 		}
 
+		//just for the debug, but we need to return those:
+		submatch_indexes := runtimeRx.FindStringSubmatchIndex(input)
+		//we are going to "just" extract the indexes to highligh them :)
+		for i := 2; i < len(submatch_indexes); i += 2 {
+			if submatch_indexes[i] != -1 {
+				couple := []int{submatch_indexes[i], submatch_indexes[i+1]}
+				found := false
+				for _, v := range ret.SubMatchIndexes {
+					if v[0] == couple[0] && v[1] == couple[1] {
+						found = true
+						break
+					}
+				}
+				if !found {
+					ret.SubMatchIndexes = append(ret.SubMatchIndexes, couple)
+				}
+			}
+		}
+		fmt.Println(submatch_indexes)
+		fmt.Printf("stored submatche indexes: %v\n", ret.SubMatchIndexes)
+		submatches := runtimeRx.FindAllStringSubmatch(input, 1)
+		fmt.Printf("captures: %q\n", submatches)
 		return ret
 	}
 	fmt.Printf("'%s' does not match '%s'\n", pattern, input)
@@ -164,6 +192,9 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 				//store indexes
 				finalret["__idx_start"] = partial.IdxStart
 				finalret["__idx_end"] = partial.IdxEnd
+				//yes, we need something better, but if I return the array here, wasm crashes, so let's cheat
+				x, _ := json.Marshal(partial.SubMatchIndexes)
+				finalret["__submatches_idx"] = string(x)
 
 				//we are at the last char of the pattern, we matched everything
 				if len(pattern) == idx+1 {
