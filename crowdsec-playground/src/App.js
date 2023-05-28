@@ -1,14 +1,14 @@
-import { Component } from 'react';
 import './App.css';
 
-import GrokDebugger from './components/grokDebugger/grokDebugger.js';
-import GrokLibrary from './components/grokLibrary/grokLibrary';
-import CircularProgress from '@mui/material/CircularProgress';
-import ResponsiveAppBar from './components/header/header.tsx';
-import { Grid } from '@mui/material';
-import Item from '@mui/material/Grid';
+import React from 'react';
 
-class App extends Component {
+import { Outlet } from 'react-router-dom';
+
+import CircularProgress from '@mui/material/CircularProgress';
+import WASMLoader from './components/wasmLoader/wasmLoader';
+import ResponsiveAppBar from './components/header/header.tsx';
+
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,35 +16,17 @@ class App extends Component {
     };
   }
 
-  async componentDidMount() {
-    const go = new window.Go();
-    //const res = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);
-    fetch("main.wasm").then(response =>
-      response.arrayBuffer()
-    ).then(bytes =>
-      WebAssembly.instantiate(bytes, go.importObject)
-    ).then(result => {
-      console.log("Go: ", go);
-      console.log("Result: ", result);
-      go.run(result.instance);
-      window.grokInit().then(() => {
-        console.log("Grok Init Done");
-        this.setState({ isLoaded: true });
-      });
-      window.patternsLoaded = false;
-    });
+  handleLoaded = () => {
+    this.setState({ isLoaded: true });
   }
 
   render() {
     const { isLoaded } = this.state;
-    //console.log(window)
-    //console.log(window.test())
     return (
       <div className="App">
-        <div><ResponsiveAppBar/></div>
-        {!isLoaded ? <div class="centered"><CircularProgress /><div>Loading Grok Debugger</div></div> :
-        <GrokDebugger/>
-        }
+        <ResponsiveAppBar/>
+        <WASMLoader onLoad={this.handleLoaded} />
+        { isLoaded ? <div><Outlet /></div> : <div class="centered"><CircularProgress /><div>Loading Crowdsec Playground</div></div>}
       </div>
     );
   }

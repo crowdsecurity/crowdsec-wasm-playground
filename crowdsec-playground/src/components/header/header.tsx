@@ -9,20 +9,17 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 
 import {ReactComponent as CrowdsecLogo} from '../../crowdsec.svg';
+import { Link } from 'react-router-dom';
 
-const pages = ['Grok Debugger', 'Crowdsec Parser Testing', 'Crowdsec Scenario Testing', 'Notification Template Testing'];
+const pages = {
+  'Grok Debugger': '/grok',
+  'Crowdsec Parser Testing': '/parser',
+  'Crowdsec Scenario Testing': '/scenario',
+  'Notification Template Testing': '/notifications',
+}
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
 
   return (
     <AppBar position="static">
@@ -61,23 +58,21 @@ function ResponsiveAppBar() {
                 horizontal: 'left',
               }}
               open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
               sx={{
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+              {Object.keys(pages).map((page, index) => (
+                <MenuItem divider={true} component={Link} to={pages[page]} key={page}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
             </Menu>
           </Box>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+            {Object.keys(pages).map((page) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+              component={Link} to={pages[page]} key={page}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page}
