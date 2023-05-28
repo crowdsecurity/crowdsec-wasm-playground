@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"syscall/js"
@@ -16,39 +17,61 @@ var Grok grokky.Host
 
 var AllGrokPatternsURL = "https://gist.githubusercontent.com/buixor/cb571dd8c4a9c8a749bd89ee824f77da/raw/69efc233439bfba086fea14521c06455276665b9/grok_patterns.txt"
 
-func grokInit() error {
-	fmt.Printf("loading all them grok patterns\n")
-	Grok = grokky.NewBase()
-	// Get the data
-	resp, err := http.Get(AllGrokPatternsURL)
-	if err != nil {
-		fmt.Printf("error while downloading grok patterns : %s\n", err)
-		return err
-	}
-	defer resp.Body.Close()
+func grokInit(this js.Value, args []js.Value) interface{} {
 
-	// Read the body
-	r := bufio.NewReader(resp.Body)
-	idx := 0
-	for {
-		line, err := r.ReadString('\n')
-		if err != nil {
-			fmt.Printf("error while reading grok patterns : %s\n", err)
-			break
-		}
-		name := strings.Split(line, " ")[0]
-		patt := strings.Join(strings.Split(line, " ")[1:], " ")
-		if err := Grok.Add(name, patt); err != nil {
-			fmt.Printf("error while adding grok pattern %s : %s\n", name, err)
-		}
-		idx++
-		if idx%10 == 0 {
-			fmt.Printf("loaded %d patterns\n", idx)
-		}
-	}
-	fmt.Printf("loaded ALL %d patterns\n", idx)
+	handler := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 
-	return nil
+		resolve := args[0]
+		reject := args[1]
+		//The HTTP request must be done in a goroutine, or else we are blocking the event loop
+		//Leading to a deadlock
+		//We return a promise, so we can use .then() in JS
+		go func() {
+			fmt.Printf("loading all them grok patterns\n")
+			Grok = grokky.NewBase()
+			var body []byte
+			// Get the data
+			resp, err := http.Get(AllGrokPatternsURL)
+			if err != nil {
+				errorConstructor := js.Global().Get("Error")
+				errorObject := errorConstructor.New("error while downloading grok patterns : " + err.Error())
+				reject.Invoke(errorObject)
+				return
+			}
+			defer resp.Body.Close()
+
+			body, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				errorConstructor := js.Global().Get("Error")
+				errorObject := errorConstructor.New("error while reading grok patterns : " + err.Error())
+				reject.Invoke(errorObject)
+				return
+			}
+			fmt.Printf("loaded %d bytes\n", len(body))
+			idx := 0
+			scanner := bufio.NewScanner(strings.NewReader(string(body)))
+			for scanner.Scan() {
+				line := scanner.Text()
+				name := strings.Split(line, " ")[0]
+				patt := strings.Join(strings.Split(line, " ")[1:], " ")
+				if err := Grok.Add(name, patt); err != nil {
+					fmt.Printf("error while adding grok pattern %s : %s\n", name, err)
+				}
+				idx++
+				if idx%10 == 0 {
+					fmt.Printf("loaded %d patterns\n", idx)
+				}
+			}
+			fmt.Printf("loaded ALL %d patterns\n", idx)
+			resolve.Invoke("ok")
+			return
+		}()
+		return nil
+	})
+
+	promiseConstructor := js.Global().Get("Promise")
+	return promiseConstructor.New(handler)
+
 }
 
 // func validateGrok(pattern string) error {
@@ -217,6 +240,7 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 	if prev_idx == 0 {
 		fmt.Printf("we matched nothing!\n")
 		finalret["__idx"] = 0
+		finalret["__error"] = "no match"
 		return finalret
 	}
 	fmt.Printf("we shouldn't be here .... \n")
@@ -247,12 +271,51 @@ func runGrok(this js.Value, args []js.Value) interface{} {
 	return retiface
 }
 
+func getGrokPatterns(this js.Value, args []js.Value) interface{} {
+	ret := map[string]interface{}{}
+	fmt.Printf("getGrokPatterns\n")
+	fmt.Printf("loaded %d patterns\n", len(Grok.Patterns))
+	for k, v := range Grok.Patterns {
+		ret[k] = v
+	}
+	return ret
+}
+
+func addPattern(this js.Value, args []js.Value) interface{} {
+	if len(args) != 2 {
+		return map[string]string{"error": "Invalid no of arguments passed"}
+	}
+	name := args[0].String()
+	expr := args[1].String()
+	err := Grok.Add(name, expr)
+	if err != nil {
+		fmt.Printf("error while adding grok pattern %s : %s\n", name, err)
+		return map[string]interface{}{"error": err.Error()}
+	}
+	return map[string]interface{}{"success": true}
+}
+
+/*func deletePattern(this js.Value, args []js.Value) interface{} {
+	if len(args) != 1 {
+		return map[string]string{"error": "Invalid no of arguments passed"}
+	}
+	name := args[0].String()
+	err := Grok.Delete(name)
+	if err != nil {
+		fmt.Printf("error while deleting grok pattern %s : %s\n", name, err)
+		return map[string]interface{}{"error": err.Error()}
+	}
+	return map[string]interface{}{"success": true}
+}*/
+
 func main() {
 	fmt.Println("yolo")
-	grokInit()
+	js.Global().Set("grokInit", js.FuncOf(grokInit))
 	js.Global().Set("validateGrok", js.FuncOf(validateGrok))
 	js.Global().Set("runGrok", js.FuncOf(runGrok))
 	js.Global().Set("debugGrok", js.FuncOf(debugGrok))
+	js.Global().Set("getGrokPatterns", js.FuncOf(getGrokPatterns))
+	js.Global().Set("addPattern", js.FuncOf(addPattern))
 
 	<-make(chan bool)
 
