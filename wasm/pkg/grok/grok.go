@@ -130,7 +130,7 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 		} else {
 			fmt.Printf("wtf not 2 indexes ?\n")
 		}
-		fmt.Printf("'%s' matches '%s'\n", pattern, input)
+		fmt.Printf("'%s' matches (%d - %d)\n", pattern, ret.IdxStart, ret.IdxEnd)
 		tmp_capture := runtimeRx.Parse(input)
 		for k, v := range tmp_capture {
 			ret.Match[k] = v
@@ -154,10 +154,7 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 				}
 			}
 		}
-		fmt.Println(submatch_indexes)
 		fmt.Printf("stored submatche indexes: %v\n", ret.SubMatchIndexes)
-		submatches := runtimeRx.FindAllStringSubmatch(input, 1)
-		fmt.Printf("captures: %q\n", submatches)
 		return ret
 	}
 	fmt.Printf("'%s' does not match '%s'\n", pattern, input)
@@ -179,17 +176,12 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 	fmt.Printf("pattern is '%s'\n", pattern)
 
 	for idx < len(pattern) {
-		fmt.Printf("idx=%d\n", idx)
-		if pattern[idx] == '\\' {
-			idx++
-			continue
-		}
 		//we got a break : space or '%{' or end of string
 		if (pattern[idx] == ' ') ||
 			(len(pattern) > idx+1 && pattern[idx] == '%' && pattern[idx+1] == '{') ||
-			(len(pattern) == idx+1) {
+			(len(pattern)-1 == idx) {
 			//we got a pattern
-			subpattern := pattern[:idx]
+			subpattern := pattern[:idx+1]
 			fmt.Printf("subpattern : '%s'\n", subpattern)
 			partial := isSubPattternOk(subpattern, input)
 			//if we cannot compile it, continue in search of valid pattern
@@ -222,10 +214,13 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 				continue
 			} else {
 				//we cannot match, let's stop here and return the previous match
-				fmt.Printf("we cannot match, let's stop here and return the previous match (idx=%d)\n", prev_idx)
-				return finalret
+				fmt.Printf("we cannot match (idx=%d / len=%d), let's continue and keep the previous match (prev_idx=%d)\n", idx, len(pattern), prev_idx)
+				idx++
+				continue
+				//return finalret
 			}
 		}
+		fmt.Printf("idx=%d / len=%d\n", idx, len(pattern))
 		idx++
 	}
 

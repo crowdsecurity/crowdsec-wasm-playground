@@ -7,7 +7,7 @@ import { styled } from '@mui/system';
 import { Grid } from '@mui/material';
 import Item from '@mui/material/Grid';
 import GrokLibrary from '../grokLibrary/grokLibrary';
-
+import RichTextDisplay from '../richTextDisplay/richtextdisplay';
 
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -21,6 +21,101 @@ const StyledTextarea = styled(TextareaAutosize)({
 	},
   });
 
+/*
+console.log("idx => ", idx , " type => ", typeof idx)
+		console.log("ret => ", ret , " type => ", typeof ret)
+		console.log("error => ", error , " type => ", typeof error)
+		console.log("start_idx => ", start_idx , " type => ", typeof start_idx)
+		console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
+		console.log("submatch indexes => ", submatch_indexes , " type => ", typeof submatch_indexes)
+
+*/
+
+var submatch_group_colors = ['yellow', 'blue', 'green', 'orange']
+
+function renderPattern(end_idx, pattern) {
+	let patternStyles = []
+	let insubmatch = false
+	let submatch_idx = 0
+
+	//-1 means full match
+	if (end_idx == -1) {
+		console.log("full match!")
+		end_idx = pattern.length
+	}
+
+	renderchar:
+	for (let i = 0; i < pattern.length; i++) {
+		//console.log("char[%d] = %s", i, pattern[i])
+		if (i > end_idx) {
+			//console.log("after pattern")
+			patternStyles.push(
+				{ text: pattern[i], style: { color: 'red', fontWeight: 'bold'} }
+			)
+			continue renderchar
+		}
+
+		//console.log("substring => %s", pattern.substring(i-2, i))
+		//identify if we're in or out of a submatch
+		if (pattern[i] == "%" && pattern[i+1] == "{") {
+			//console.log("entering submatch %d", submatch_idx)
+			insubmatch = true
+		}
+
+		if (insubmatch ==  true && pattern[i-1] == "}" && pattern[i-2] != "\\") {
+			insubmatch = false
+			//console.log("leaving submatch %d", submatch_idx)
+			submatch_idx++
+		}
+
+		if (insubmatch == true) {
+			//console.log("in submatch %d", submatch_idx)
+			patternStyles.push(
+				{ text: pattern[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[submatch_idx]} }
+			)
+			continue renderchar
+		}
+
+		//we're not in a submatch, but we're matched
+		//console.log("in match")
+		patternStyles.push(
+			{ text: pattern[i], style: { color: 'green', fontWeight: 'bold'} }
+		)
+	}
+	return patternStyles
+}
+
+//render the text with the correct color
+function renderText(start_idx, end_idx, submatch_idx, text) {
+	let dataStyles = []
+	renderchar:
+	for (let i = 0; i < text.length; i++) {
+		//The char isn't matched
+		if (i < start_idx || i >= end_idx) {
+			dataStyles.push(
+				{ text: text[i], style: { color: 'red', fontWeight: 'bold'} }
+			)
+			continue renderchar
+		}
+		//Is the char part of a submatch ?
+		let submatch = false
+		for (let j = 0; j < submatch_idx.length; j++) {
+			if (i >= submatch_idx[j][0] && i < submatch_idx[j][1]) {
+				dataStyles.push(
+					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[j] } }
+				)
+				continue renderchar
+			}
+		}
+		//The char is matched, but not part of a submatch
+		dataStyles.push(
+			{ text: text[i], style: { color: 'green', fontWeight: 'bold'} }
+		)
+		
+	}
+	return dataStyles
+}
+
 function GrokDebugger() {
 
 	//const [patternValue, setPatternValue] = React.useState('');
@@ -29,6 +124,8 @@ function GrokDebugger() {
 	const [matchedValue, setMatchedValue] = React.useState('');
 	const [unmatchedValue, setUnmatchedValue] = React.useState('');
 	const [error, setError] = React.useState('');
+	const [grokStyles, setGrokStyles] = React.useState([]);
+	const [dataStyles, setDataStyles] = React.useState([]);
 
 	const patternValue = useRef("");
 	const inputValue = useRef("");
@@ -61,8 +158,10 @@ function GrokDebugger() {
 			return
 		}
 
-		var submatch_indexes = JSON.parse(ret["__submatches_idx"])
-		delete ret["__submatches_idx"]
+		if ("__submatches_idx" in ret) {
+			var submatch_indexes = JSON.parse(ret["__submatches_idx"])
+			delete ret["__submatches_idx"]
+		}
 
 		console.log("idx => ", idx , " type => ", typeof idx)
 		console.log("ret => ", ret , " type => ", typeof ret)
@@ -71,54 +170,14 @@ function GrokDebugger() {
 		console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
 		console.log("submatch indexes => ", submatch_indexes , " type => ", typeof submatch_indexes)
 
-
+		if (idx != undefined) {
 		if (ret !== undefined) {
-			setOutputDictValue(JSON.stringify(ret, null, 2))
+		 	setOutputDictValue(JSON.stringify(ret, null, 2))
+		 }
+
+		setDataStyles( renderText(start_idx, end_idx, submatch_indexes, inputValue.current) )
+		setGrokStyles( renderPattern(idx, patternValue.current) )
 		}
-		if (idx == -1) {
-			let z = "<font color='green'> full match </font><br>"
-			z += "<font color='green'>" + JSON.stringify(ret) + "</font>"
-			setOutputDictValue(JSON.stringify(ret, null, 2))
-			setMatchedValue(inputValue.current)
-		} else {
-
-			setMatchedValue(inputValue.current.substring(0, idx))
-			setUnmatchedValue(inputValue.current.substring(idx))
-			/*let z = "match until index " + idx + "<br>"
-			z += "(green part of regexp matches) <font color=\"green\">" + patternValue.current.slice(0, idx) + "</font>"
-			z += "<font color=\"red\">" + patternValue.current.slice(idx) + "</font><br>"
-			
-			z += "(green part of input matched) "
-			for (let i = 0; i < inputValue.current.length; i++) {
-				let bold = false
-				console.log("sumatch indexes => ", ret["__submatches_idx"])
-				for (let j = 0; j < submatch_indexes.length; j++) {
-					if (i >= submatch_indexes[j][0] && i < submatch_indexes[j][1]) {
-						bold = true
-						console.log("index %d is in [%d,%d]", i, submatch_indexes[j][0], submatch_indexes[j][1])
-						z += "<b>"
-						break
-					}
-				}
-
-				if (i >= start_idx && i < end_idx) {
-					z += "<font color=\"green\">" + inputValue.current[i] + "</font>"
-				} else if (i > end_idx) {
-					z += "<font color=\"red\">" + inputValue.current[i] + "</font>"
-				} 
-				if (bold == true) {
-					z += "</b>"
-				}
-			}
-			z += "<br>"
-
-			// z += "(green part of input matched) <font color=\"green\">" + input.substring(start_idx, end_idx) + "</font>"
-			// z += "<font color=\"red\">" + input.substring(end_idx) + "</font><br>"
-
-			z += "Last match : <br>" + JSON.stringify(ret) + "<br>"*/
-			//setOutputDictValue(ret)
-		}
-
 	}
 
 	return (
@@ -146,6 +205,10 @@ function GrokDebugger() {
 		<div>{outputDictValue}</div>
 		<div className='matched'>{matchedValue}</div>
 		<div className='unmatched'>{unmatchedValue}</div>
+		<h2> Grok Pattern results </h2>
+		<div className='grokResult'><RichTextDisplay styles={grokStyles}/></div>
+		<h2> Match data results </h2>
+		<div className='dataResult'><RichTextDisplay styles={dataStyles}/></div>
 		</div>
 		  </Item>
 		</Grid>
