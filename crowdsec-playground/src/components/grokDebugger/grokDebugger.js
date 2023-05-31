@@ -134,40 +134,30 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 	return dataStyles
 }
 
-function GrokDebugger() {
-
-	//const [patternValue, setPatternValue] = React.useState('');
-	//const [inputValue, setInputValue] = React.useState('');
+const GrokDebugger = () => {
 	const [outputDictValue, setOutputDictValue] = React.useState('');
 	const [error, setError] = React.useState('');
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
-
+  
 	const patternValue = useRef("");
 	const inputValue = useRef("");
-
-	const handlePatternChange = (e) => {
-		patternValue.current = e.target.value;
-	}
-
-	const handleInputChange = (e) => {
-		inputValue.current = e.target.value;
-	}
-
+  
 	const handleExampleChange = (e) => {
-		if (e === null) {
-			return
-		}
-		setGrokExample(e.target.value)
-		//console.log(e.target.value)
-		patternValue.current = GrokPatternExamples[e.target.value]["pattern"]
-		inputValue.current = GrokPatternExamples[e.target.value]["input"]
+	  if (e === null) {
+		return
+	  }
+	  setGrokExample(e.target.value)
+	  const examplePattern = GrokPatternExamples[e.target.value]["pattern"];
+	  const exampleInput = GrokPatternExamples[e.target.value]["input"];
+	  patternValue.current.value = examplePattern;
+	  inputValue.current.value = exampleInput;
 	}
 
 	const HandleClick = () => {
 		setError('')
-		var ret = window.debugGrok(patternValue.current, inputValue.current)
+		var ret = window.debugGrok(patternValue.current.value, inputValue.current.value)
 
 		console.log(ret)
 
@@ -202,8 +192,8 @@ function GrokDebugger() {
 				setOutputDictValue(JSON.stringify(ret, null, 2))
 			}
 
-			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current))
-			setGrokStyles(renderPattern(idx, patternValue.current))
+			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current.value))
+			setGrokStyles(renderPattern(idx, patternValue.current.value))
 		}
 	}
 
@@ -234,16 +224,14 @@ function GrokDebugger() {
 							minRows={1}
 							className="fixed-textarea"
 							placeholder="Grok Pattern"
-							onChange={handlePatternChange}
-							value={patternValue.current}
+							ref={patternValue}
 						/>
 						<div align="left"><h1>Test Data</h1></div>
 						<StyledTextarea
 							minRows={3}
 							className='fixed-textarea'
 							placeholder="Input"
-							onChange={handleInputChange}
-							value={inputValue.current}
+							ref={inputValue}
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
 						<h1>Output</h1>
