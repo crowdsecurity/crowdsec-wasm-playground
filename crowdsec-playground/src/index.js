@@ -6,7 +6,7 @@ import Home from './components/home/home';
 import reportWebVitals from './reportWebVitals';
 
 import {
-    createBrowserRouter,
+    createHashRouter,
     createRoutesFromElements,
     RouterProvider,
     Route,
@@ -18,7 +18,7 @@ import GrokDebugger from './components/grokDebugger/grokDebugger';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
-const router = createBrowserRouter(
+const router = createHashRouter(
     createRoutesFromElements(
       <Route path="/" element={<App />} >
         <Route index element={<Home />} />
