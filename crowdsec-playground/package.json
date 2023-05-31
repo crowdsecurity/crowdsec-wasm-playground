@@ -2,6 +2,7 @@
   "name": "crowdsec-playground",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://crowdsecurity.github.io/crowdsec-wasm-playground/",
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
