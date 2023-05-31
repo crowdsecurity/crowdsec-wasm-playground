@@ -20,7 +20,89 @@ import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
+class AddPatternComponent extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      newPatternKey: '',
+      newPatternValue: '',
+      dialogOpen: false,
+    };
+  }
+
+  handleInputChange = (event) => {
+		this.setState({
+		  [event.target.name]: event.target.value,
+		});
+	  }
+
+  handleOpenDialog = () => {
+		this.setState({
+		  dialogOpen: true,
+		});
+	  }
+
+  handleCloseDialog = () => {
+		this.setState({
+		  dialogOpen: false,
+		});
+	  }
+
+  handleSubmit = () => {
+    this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
+    this.handleCloseDialog();
+    this.setState({newPatternKey: ''});
+    this.setState({newPatternValue: ''});
+  }
+
+  render() {
+return (
+  <>
+  <Button 
+  onClick={this.handleOpenDialog}
+  variant="contained"
+  color="primary"
+>
+  Add Pattern
+</Button>
+<Dialog open={this.state.dialogOpen} onClose={this.handleCloseDialog}>
+  <DialogTitle>Add New Pattern</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Please enter the key and value for the new pattern.
+    </DialogContentText>
+    <TextField
+      autoFocus
+      margin="dense"
+      name="newPatternKey"
+      value={this.state.newPatternKey}
+      onChange={this.handleInputChange}
+      label="Pattern Key"
+      fullWidth
+    />
+    <TextField
+      margin="dense"
+      name="newPatternValue"
+      value={this.state.newPatternValue}
+      onChange={this.handleInputChange}
+      label="Pattern Value"
+      fullWidth
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={this.handleCloseDialog} color="primary">
+      Cancel
+    </Button>
+    <Button onClick={this.handleSubmit} color="primary">
+      Add
+    </Button>
+  </DialogActions>
+</Dialog>
+</>
+)
+  }
+}
 
 class GrokLibrary extends Component {
 	constructor(props) {
@@ -66,37 +148,15 @@ class GrokLibrary extends Component {
       },
     }));
   }
-
-	handleInputChange = (event) => {
-		this.setState({
-		  [event.target.name]: event.target.value,
-		});
-	  }
 	
-	  handleOpenDialog = () => {
-		this.setState({
-		  dialogOpen: true,
-		});
-	  }
-	
-	  handleCloseDialog = () => {
-		this.setState({
-		  dialogOpen: false,
-		});
-	  }
-	
-	  addPattern = () => {
-		const { newPatternKey, newPatternValue } = this.state;
-		if (newPatternKey && newPatternValue) {
-      window.addPattern(newPatternKey, newPatternValue);
+	  addPattern = (patternKey, patternValue) => {
+		if (patternKey && patternValue) {
+      window.addPattern(patternKey, patternKey);
 		  this.setState(prevState => ({
 			patterns: {
 			  ...prevState.patterns,
-			  [newPatternKey]: newPatternValue,
+			  [patternKey]: patternValue,
 			},
-			newPatternKey: '',
-			newPatternValue: '',
-			dialogOpen: false,
 		  }));
 		}
 	  }
@@ -118,46 +178,8 @@ class GrokLibrary extends Component {
 		return (
 			<div>
 			<h1>Grok Pattern Library</h1>
-			<Button 
-          onClick={this.handleOpenDialog}
-          variant="contained"
-          color="primary"
-        >
-          Add Pattern
-        </Button>
-        <Dialog open={this.state.dialogOpen} onClose={this.handleCloseDialog}>
-          <DialogTitle>Add New Pattern</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Please enter the key and value for the new pattern.
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              name="newPatternKey"
-              value={this.state.newPatternKey}
-              onChange={this.handleInputChange}
-              label="Pattern Key"
-              fullWidth
-            />
-            <TextField
-              margin="dense"
-              name="newPatternValue"
-              value={this.state.newPatternValue}
-              onChange={this.handleInputChange}
-              label="Pattern Value"
-              fullWidth
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleCloseDialog} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={this.addPattern} color="primary">
-              Add
-            </Button>
-          </DialogActions>
-        </Dialog>
+
+        <AddPatternComponent addPattern={this.addPattern}/>
         <TextField
           name="search"
           value={this.state.search}
