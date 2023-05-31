@@ -32,90 +32,90 @@ class AddPatternComponent extends Component {
   }
 
   handleInputChange = (event) => {
-		this.setState({
-		  [event.target.name]: event.target.value,
-		});
-	  }
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  }
 
   handleOpenDialog = () => {
-		this.setState({
-		  dialogOpen: true,
-		});
-	  }
+    this.setState({
+      dialogOpen: true,
+    });
+  }
 
   handleCloseDialog = () => {
-		this.setState({
-		  dialogOpen: false,
-		});
-	  }
+    this.setState({
+      dialogOpen: false,
+    });
+  }
 
   handleSubmit = () => {
     this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
     this.handleCloseDialog();
-    this.setState({newPatternKey: ''});
-    this.setState({newPatternValue: ''});
+    this.setState({ newPatternKey: '' });
+    this.setState({ newPatternValue: '' });
   }
 
   render() {
-return (
-  <>
-  <Button 
-  onClick={this.handleOpenDialog}
-  variant="contained"
-  color="primary"
->
-  Add Pattern
-</Button>
-<Dialog open={this.state.dialogOpen} onClose={this.handleCloseDialog}>
-  <DialogTitle>Add New Pattern</DialogTitle>
-  <DialogContent>
-    <DialogContentText>
-      Please enter the key and value for the new pattern.
-    </DialogContentText>
-    <TextField
-      autoFocus
-      margin="dense"
-      name="newPatternKey"
-      value={this.state.newPatternKey}
-      onChange={this.handleInputChange}
-      label="Pattern Key"
-      fullWidth
-    />
-    <TextField
-      margin="dense"
-      name="newPatternValue"
-      value={this.state.newPatternValue}
-      onChange={this.handleInputChange}
-      label="Pattern Value"
-      fullWidth
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={this.handleCloseDialog} color="primary">
-      Cancel
-    </Button>
-    <Button onClick={this.handleSubmit} color="primary">
-      Add
-    </Button>
-  </DialogActions>
-</Dialog>
-</>
-)
+    return (
+      <>
+        <Button
+          onClick={this.handleOpenDialog}
+          variant="contained"
+          color="primary"
+        >
+          Add Pattern
+        </Button>
+        <Dialog open={this.state.dialogOpen} onClose={this.handleCloseDialog}>
+          <DialogTitle>Add New Pattern</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the key and value for the new pattern.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="newPatternKey"
+              value={this.state.newPatternKey}
+              onChange={this.handleInputChange}
+              label="Pattern Key"
+              fullWidth
+            />
+            <TextField
+              margin="dense"
+              name="newPatternValue"
+              value={this.state.newPatternValue}
+              onChange={this.handleInputChange}
+              label="Pattern Value"
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </>
+    )
   }
 }
 
 class GrokLibrary extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			patterns: window.getGrokPatterns(),
+  constructor(props) {
+    super(props);
+    this.state = {
+      patterns: window.getGrokPatterns(),
       search: '',
       patternsOpenState: {},
-		};
-	}
+    };
+  }
 
-	async componentDidMount() {
-	}
+  async componentDidMount() {
+  }
 
   updateSearch(event) {
     this.setState({ search: event.target.value });
@@ -135,7 +135,7 @@ class GrokLibrary extends Component {
       },
     }));
   }
-  
+
   handleClose(key) {
     console.log("Closing ", key)
     console.log("State: ", this.state.patternsOpenState)
@@ -148,38 +148,38 @@ class GrokLibrary extends Component {
       },
     }));
   }
-	
-	  addPattern = (patternKey, patternValue) => {
-		if (patternKey && patternValue) {
-      window.addPattern(patternKey, patternKey);
-		  this.setState(prevState => ({
-			patterns: {
-			  ...prevState.patterns,
-			  [patternKey]: patternValue,
-			},
-		  }));
-		}
-	  }
-	
-	  deletePattern = (key) => {
-		this.setState(prevState => {
-		  let patterns = {...prevState.patterns};
-		  delete patterns[key];
-		  return {patterns};
-		});
-	  }
 
-	render() {
+  addPattern = (patternKey, patternValue) => {
+    if (patternKey && patternValue) {
+      window.addPattern(patternKey, patternKey);
+      this.setState(prevState => ({
+        patterns: {
+          ...prevState.patterns,
+          [patternKey]: patternValue,
+        },
+      }));
+    }
+  }
+
+  deletePattern = (key) => {
+    this.setState(prevState => {
+      let patterns = { ...prevState.patterns };
+      delete patterns[key];
+      return { patterns };
+    });
+  }
+
+  render() {
     let filteredPatterns = Object.keys(this.state.patterns).filter(
       (key) => {
         return key.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1;
       }
     );
-		return (
-			<div>
-			<h1>Grok Pattern Library</h1>
+    return (
+      <div>
+        <h1>Grok Pattern Library</h1>
 
-        <AddPatternComponent addPattern={this.addPattern}/>
+        <AddPatternComponent addPattern={this.addPattern} />
         <TextField
           name="search"
           value={this.state.search}
@@ -189,69 +189,69 @@ class GrokLibrary extends Component {
         />
         <TableContainer component={Paper}>
           <div style={{ height: "700px", overflow: "auto" }}>
-          <Table aria-label="simple table" size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Pattern</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredPatterns.sort().map((key, index) => (
-                <>
-                <TableRow
-                  key={index}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  onClick={() => this.state.patternsOpenState[key] === true ? this.handleClose(key) : this.handleOpen(key)}
-                >
-                  <TableCell component="th" scope="row">
-                  <IconButton
-      aria-label="expand row"
-      size="small"
-      onClick={(event) => {
-        event.stopPropagation();
-        this.state.patternsOpenState[key] ? this.handleClose(key) : this.handleOpen(key);
-      }}
-    >
-      <ExpandMoreIcon 
-        style={{
-          transform: this.state.patternsOpenState[key] ? 'rotate(0deg)' : 'rotate(270deg)',
-          transition: 'transform 0.1s',
-        }}
-      />
-    </IconButton>
-                    {key}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button 
-                      onClick={(event) => {event.stopPropagation(); this.deletePattern(key)}}
-                      variant="contained"
-                      color="secondary"
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
+            <Table aria-label="simple table" size="small">
+              <TableHead>
                 <TableRow>
-            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-              <Collapse in={this.state.patternsOpenState[key]} timeout="auto" unmountOnExit>
-                <Box margin={1}>
-                  <Typography variant="body1" gutterBottom component="div">
-                  {this.state.patterns[key]}
-                  </Typography>
-                </Box>
-              </Collapse>
-            </TableCell>
-          </TableRow>
-                </>
-              ))}
-            </TableBody>
-          </Table>
+                  <TableCell>Pattern</TableCell>
+                  <TableCell align="right">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredPatterns.sort().map((key, index) => (
+                  <>
+                    <TableRow
+                      key={index}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      onClick={() => this.state.patternsOpenState[key] === true ? this.handleClose(key) : this.handleOpen(key)}
+                    >
+                      <TableCell component="th" scope="row">
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            this.state.patternsOpenState[key] ? this.handleClose(key) : this.handleOpen(key);
+                          }}
+                        >
+                          <ExpandMoreIcon
+                            style={{
+                              transform: this.state.patternsOpenState[key] ? 'rotate(0deg)' : 'rotate(270deg)',
+                              transition: 'transform 0.1s',
+                            }}
+                          />
+                        </IconButton>
+                        {key}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          onClick={(event) => { event.stopPropagation(); this.deletePattern(key) }}
+                          variant="contained"
+                          color="secondary"
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <Collapse in={this.state.patternsOpenState[key]} timeout="auto" unmountOnExit>
+                          <Box margin={1}>
+                            <Typography variant="body1" gutterBottom component="div">
+                              {this.state.patterns[key]}
+                            </Typography>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </TableContainer>
-			</div>
-		);
-	}
+      </div>
+    );
+  }
 }
 
 export default GrokLibrary;
