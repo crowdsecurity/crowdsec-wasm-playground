@@ -1,4 +1,4 @@
-import { TableContainer } from "@mui/material";
+import { Alert, TableContainer } from "@mui/material";
 import { Component } from "react";
 import { Paper } from "@mui/material";
 import { Table } from "@mui/material";
@@ -28,6 +28,7 @@ class AddPatternComponent extends Component {
       newPatternKey: '',
       newPatternValue: '',
       dialogOpen: false,
+      errMsg: '',
     };
   }
 
@@ -50,8 +51,14 @@ class AddPatternComponent extends Component {
   }
 
   handleSubmit = () => {
-    this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
+    let [ret, errValue ] = this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
+    if (ret === false) {
+      console.log("Error adding pattern in submit: ", errValue)
+      this.setState({ errMsg: errValue });
+      return
+    }
     this.handleCloseDialog();
+    this.setState({ errMsg: '' });
     this.setState({ newPatternKey: '' });
     this.setState({ newPatternValue: '' });
   }
@@ -89,6 +96,7 @@ class AddPatternComponent extends Component {
               label="Pattern Value"
               fullWidth
             />
+            {this.state.errMsg && <Alert severity="error">An error occured while adding the pattern: {this.state.errMsg}.</Alert>}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleCloseDialog} color="primary">
@@ -151,7 +159,11 @@ class GrokLibrary extends Component {
 
   addPattern = (patternKey, patternValue) => {
     if (patternKey && patternValue) {
-      window.addPattern(patternKey, patternKey);
+      let ret = window.addPattern(patternKey, patternKey);
+      if (ret.error !== undefined) {
+        console.log("Error adding pattern: ", ret.error)
+        return [false, ret.error]
+      }
       this.setState(prevState => ({
         patterns: {
           ...prevState.patterns,
@@ -159,6 +171,7 @@ class GrokLibrary extends Component {
         },
       }));
     }
+    return [true, ""]
   }
 
   deletePattern = (key) => {
