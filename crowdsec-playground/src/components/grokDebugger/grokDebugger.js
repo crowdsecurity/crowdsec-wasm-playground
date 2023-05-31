@@ -2,12 +2,16 @@ import React, { useRef } from 'react';
 
 import Button from '@mui/base/Button';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
-import { Alert } from '@mui/material';
+import { Alert, InputLabel } from '@mui/material';
 import { styled } from '@mui/system';
 import { Grid } from '@mui/material';
 import Item from '@mui/material/Grid';
 import GrokLibrary from '../grokLibrary/grokLibrary';
 import RichTextDisplay from '../richTextDisplay/richtextdisplay';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
 
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -20,6 +24,21 @@ const StyledTextarea = styled(TextareaAutosize)({
 		outline: 'none',
 	},
 });
+
+const GrokPatternExamples = {
+	"nginx": {
+		"pattern": `(%{IPORHOST:target_fqdn} )?%{IPORHOST:remote_addr} - (%{NGUSER:remote_user})? \\[%{HTTPDATE:time_local}\\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:http_version}" %{NUMBER:status} %{NUMBER:body_bytes_sent} "%{NOTDQUOTE:http_referer}" "%{NOTDQUOTE:http_user_agent}"( %{NUMBER:request_length} %{NUMBER:request_time} \\[%{DATA:proxy_upstream_name}\\] \\[%{DATA:proxy_alternative_upstream_name}\\])?`,
+		"input": `1.2.3.4 - - [31/May/2023:16:45:28 +0000] "GET /upload/server/php/ HTTP/1.1" 301 178 "-" "python-requests/2.31.0"`
+	},
+	"SSH": {
+		"pattern": "%{WORD:foo} %{WORD:bar}",
+		"input": "hello world"
+	},
+	"": {
+		"pattern": "",
+		"input": ""
+	}
+}
 
 /*
 console.log("idx => ", idx , " type => ", typeof idx)
@@ -123,6 +142,7 @@ function GrokDebugger() {
 	const [error, setError] = React.useState('');
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
+	const [grokExample, setGrokExample] = React.useState('')
 
 	const patternValue = useRef("");
 	const inputValue = useRef("");
@@ -133,6 +153,16 @@ function GrokDebugger() {
 
 	const handleInputChange = (e) => {
 		inputValue.current = e.target.value;
+	}
+
+	const handleExampleChange = (e) => {
+		if (e === null) {
+			return
+		}
+		setGrokExample(e.target.value)
+		//console.log(e.target.value)
+		patternValue.current = GrokPatternExamples[e.target.value]["pattern"]
+		inputValue.current = GrokPatternExamples[e.target.value]["input"]
 	}
 
 	const HandleClick = () => {
@@ -179,6 +209,22 @@ function GrokDebugger() {
 
 	return (
 		<Grid container spacing={2}>
+			<Grid container justifyContent="flex-end">
+				<h2>Examples</h2>
+				<FormControl sx={{ m: 1, minWidth: 120 }}>
+					<InputLabel id="demo-simple-select-label">Example</InputLabel>
+					<Select
+						labelId="demo-simple-select-label"
+						id="demo-simple-select"
+						value={grokExample}
+						onChange={handleExampleChange}
+					>
+						<MenuItem value=""><em>None</em></MenuItem>
+						<MenuItem value="nginx">Nginx</MenuItem>
+						<MenuItem value="SSH">SSH</MenuItem>
+					</Select>
+				</FormControl>
+			</Grid>
 			<Grid item xs={8} md={8}>
 				<Item>
 					<div>
@@ -189,6 +235,7 @@ function GrokDebugger() {
 							className="fixed-textarea"
 							placeholder="Grok Pattern"
 							onChange={handlePatternChange}
+							value={patternValue.current}
 						/>
 						<div align="left"><h1>Test Data</h1></div>
 						<StyledTextarea
@@ -196,6 +243,7 @@ function GrokDebugger() {
 							className='fixed-textarea'
 							placeholder="Input"
 							onChange={handleInputChange}
+							value={inputValue.current}
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
 						<h1>Output</h1>
