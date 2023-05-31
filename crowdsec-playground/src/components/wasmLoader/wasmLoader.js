@@ -18,11 +18,13 @@ class WASMLoader extends React.Component {
 		  console.log("Go: ", go);
 		  console.log("Result: ", result);
 		  go.run(result.instance);
-		  window.grokInit().then(() => {
+		  window.grokInit()
+		  this.props.onLoad();
+		  /*.then(() => {
 			console.log("Grok Init Done");
 			console.log(this.props)
 			this.props.onLoad();
-		  });
+		  });*/
 		});
 	  }
 
