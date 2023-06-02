@@ -52,10 +52,11 @@ console.log("idx => ", idx , " type => ", typeof idx)
 
 var submatch_group_colors = ['yellow', 'blue', 'green', 'orange']
 
-function renderPattern(end_idx, pattern) {
+function renderPattern(end_idx, pattern, submatch_idx) {
 	let patternStyles = []
 	let insubmatch = false
-	let submatch_idx = 0
+	let submatch_name = ""
+	//let submatch_idx = 0
 
 	//-1 means full match
 	if (end_idx === -1) {
@@ -64,7 +65,6 @@ function renderPattern(end_idx, pattern) {
 	}
 
 	for (let i = 0; i < pattern.length; i++) {
-		//console.log("char[%d] = %s", i, pattern[i])
 		if (i > end_idx) {
 			//console.log("after pattern")
 			patternStyles.push(
@@ -73,23 +73,29 @@ function renderPattern(end_idx, pattern) {
 			continue
 		}
 
-		//console.log("substring => %s", pattern.substring(i-2, i))
 		//identify if we're in or out of a submatch
 		if (pattern[i] === "%" && pattern[i + 1] === "{") {
 			//console.log("entering submatch %d", submatch_idx)
-			insubmatch = true
+			//extract the name of the subgroup, and see if it matched
+
+			let capture_name_start = pattern.indexOf(":", i+2) 
+			submatch_name = pattern.substring(capture_name_start+1, pattern.indexOf("}", capture_name_start+1))
+			console.log("entering submatch %s => %s", submatch_name, Object.keys(submatch_idx))
+			if (submatch_name in submatch_idx) {
+				console.log("submatch %s is go", submatch_name)
+				insubmatch = true
+			}
 		}
 
 		if (insubmatch === true && pattern[i - 1] === "}" && pattern[i - 2] !== "\\") {
 			insubmatch = false
-			//console.log("leaving submatch %d", submatch_idx)
-			submatch_idx++
+			console.log("leaving submatch %d", submatch_name)
 		}
 
 		if (insubmatch === true) {
 			//console.log("in submatch %d", submatch_idx)
 			patternStyles.push(
-				{ text: pattern[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[submatch_idx] } }
+				{ text: pattern[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(submatch_name) } }
 			)
 			continue
 		}
@@ -103,28 +109,47 @@ function renderPattern(end_idx, pattern) {
 	return patternStyles
 }
 
+function colorFromKey(key) {
+	var output = 0
+	for (var i = 0, len = key.length; i < len; i++) {
+		output += key[i].charCodeAt(0)
+  }
+  return submatch_group_colors[output % submatch_group_colors.length]
+}
+
 //render the text with the correct color
 function renderText(start_idx, end_idx, submatch_idx, text) {
 	let dataStyles = []
 
+	nextchar:
 	for (let i = 0; i < text.length; i++) {
 		//The char isn't matched
 		if (i < start_idx || i >= end_idx) {
 			dataStyles.push(
 				{ text: text[i], style: { color: 'red', fontWeight: 'bold' } }
 			)
-			continue
 		}
 		//Is the char part of a submatch ?
-		//let submatch = false
-		for (let j = 0; j < submatch_idx.length; j++) {
-			if (i >= submatch_idx[j][0] && i < submatch_idx[j][1]) {
+
+		for (const [k, indexes] of Object.entries(submatch_idx)) {
+			if (i >= indexes[0] && i < indexes[1]) {
+				console.log("char %d is part of submatch %s", i, k)
 				dataStyles.push(
-					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[j] } }
+					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(k) } }
 				)
-				continue
+				continue nextchar
 			}
 		}
+		console.log("char %d is not part of submatch", i)
+		//let submatch = false
+		// for (let j = 0; j < submatch_idx.length; j++) {
+		// 	if (i >= submatch_idx[j][0] && i < submatch_idx[j][1]) {
+		// 		dataStyles.push(
+		// 			{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[j] } }
+		// 		)
+		// 		continue nextchar
+		// 	}
+		// }
 		//The char is matched, but not part of a submatch
 		dataStyles.push(
 			{ text: text[i], style: { color: 'green', fontWeight: 'bold' } }
@@ -193,7 +218,7 @@ const GrokDebugger = () => {
 			}
 
 			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current.value))
-			setGrokStyles(renderPattern(idx, patternValue.current.value))
+			setGrokStyles(renderPattern(idx, patternValue.current.value, submatch_indexes))
 		}
 	}
 

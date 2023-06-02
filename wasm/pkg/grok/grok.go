@@ -104,8 +104,28 @@ type PartialMatch struct {
 	Compiles         bool
 	Matches          bool
 	Match            map[string]interface{}
-	SubMatchIndexes  [][]int
+	SubMatchIndexes  map[string][]int
 	IdxStart, IdxEnd int
+}
+
+// type sortIdxArray interface {
+// 	Len() int
+// 	Less(i, j int) bool
+// 	Swap(i, j int)
+// }\
+
+type matchedIdxArray [][]int
+
+func (s matchedIdxArray) Len() int {
+	return len(s)
+}
+
+func (s matchedIdxArray) Less(i, j int) bool {
+	return s[i][0] < s[j][0]
+}
+
+func (s matchedIdxArray) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 // returns : IS_VALID_PATTERN, MATCHES, MATCH_RESULT
@@ -132,29 +152,27 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 		}
 		fmt.Printf("'%s' matches (%d - %d)\n", pattern, ret.IdxStart, ret.IdxEnd)
 		tmp_capture := runtimeRx.Parse(input)
+		submatch_indexes := runtimeRx.FindStringSubmatchIndex(input)
+		//get the index map
+		submatch_map := runtimeRx.GetIndexes()
 		for k, v := range tmp_capture {
 			ret.Match[k] = v
 		}
+		fmt.Printf("full indexes : %v\n", submatch_indexes)
+		fmt.Printf("submatch map : %v\n", submatch_map)
+		ret.SubMatchIndexes = map[string][]int{}
+		for k, vidx := range submatch_map {
 
-		//just for the debug, but we need to return those:
-		submatch_indexes := runtimeRx.FindStringSubmatchIndex(input)
-		//we are going to "just" extract the indexes to highligh them :)
-		for i := 2; i < len(submatch_indexes); i += 2 {
-			if submatch_indexes[i] != -1 {
-				couple := []int{submatch_indexes[i], submatch_indexes[i+1]}
-				found := false
-				for _, v := range ret.SubMatchIndexes {
-					if v[0] == couple[0] && v[1] == couple[1] {
-						found = true
-						break
-					}
-				}
-				if !found {
-					ret.SubMatchIndexes = append(ret.SubMatchIndexes, couple)
-				}
+			fmt.Printf("name (%s) ->  %d -> %v\n", k, vidx, submatch_indexes[vidx*2:vidx*2+2])
+			couple := []int{submatch_indexes[vidx*2], submatch_indexes[vidx*2+1]}
+			//there wasn't a match for this group
+			if couple[0] == -1 || couple[1] == -1 {
+				continue
 			}
+			ret.SubMatchIndexes[k] = couple
 		}
-		fmt.Printf("stored submatche indexes: %v\n", ret.SubMatchIndexes)
+		//let's now sort the array of indexes
+		//sort.Sort(matchedIdxArray(ret.SubMatchIndexes))
 		return ret
 	}
 	fmt.Printf("'%s' does not match '%s'\n", pattern, input)
