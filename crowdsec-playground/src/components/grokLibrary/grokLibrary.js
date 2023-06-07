@@ -18,6 +18,11 @@ import { Typography } from "@mui/material";
 import { Collapse } from "@mui/material";
 import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Pagination from '@mui/material/Pagination';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
+
 
 
 class AddPatternComponent extends Component {
@@ -51,7 +56,7 @@ class AddPatternComponent extends Component {
   }
 
   handleSubmit = () => {
-    let [ret, errValue ] = this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
+    let [ret, errValue] = this.props.addPattern(this.state.newPatternKey, this.state.newPatternValue);
     if (ret === false) {
       console.log("Error adding pattern in submit: ", errValue)
       this.setState({ errMsg: errValue });
@@ -119,6 +124,8 @@ class GrokLibrary extends Component {
       patterns: window.getGrokPatterns(),
       search: '',
       patternsOpenState: {},
+      page: 1,
+      rowsPerPage: 10,
     };
   }
 
@@ -182,12 +189,27 @@ class GrokLibrary extends Component {
     });
   }
 
+  handlePageChange = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleRowsPerPageChange = (event) => {
+    this.setState({ rowsPerPage: parseInt(event.target.value, 10), page: 1 });
+  };
+
+
+
+
   render() {
-    let filteredPatterns = Object.keys(this.state.patterns).filter(
+    const { patterns, search, page, rowsPerPage } = this.state;
+    let patternKeys = Object.keys(patterns).filter(
       (key) => {
-        return key.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1;
+        return key.toLowerCase().indexOf(search.toLowerCase()) !== -1;
       }
-    );
+    ).sort();
+
+    const currentPagePatternKeys = patternKeys.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
     return (
       <div>
         <h1>Grok Pattern Library</h1>
@@ -195,13 +217,13 @@ class GrokLibrary extends Component {
         <AddPatternComponent addPattern={this.addPattern} />
         <TextField
           name="search"
-          value={this.state.search}
+          value={search}
           onChange={this.updateSearch.bind(this)}
           label="Search Patterns"
           fullWidth
         />
         <TableContainer component={Paper}>
-          <div style={{ height: "700px", overflow: "auto" }}>
+          <div style={{ maxHeight: "700px", overflow: "auto" }}>
             <Table aria-label="simple table" size="small">
               <TableHead>
                 <TableRow>
@@ -210,7 +232,7 @@ class GrokLibrary extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredPatterns.sort().map((key, index) => (
+                {currentPagePatternKeys.map((key, index) => (
                   <>
                     <TableRow
                       key={index}
@@ -262,9 +284,24 @@ class GrokLibrary extends Component {
             </Table>
           </div>
         </TableContainer>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+        <Pagination count={Math.ceil(patternKeys.length / rowsPerPage)} page={page} onChange={this.handlePageChange}/>
+        Number of items per page:
+        <Select
+          value={rowsPerPage}
+          onChange={this.handleRowsPerPageChange}
+        >
+          {[10, 20, 30, 50].map((num) => (
+            <MenuItem key={num} value={num}>
+              {num}
+            </MenuItem>
+          ))}
+        </Select>
+        </div>
       </div>
     );
   }
+
 }
 
 export default GrokLibrary;
