@@ -11,7 +11,13 @@ import RichTextDisplay from '../richTextDisplay/richtextdisplay';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-
+import { Table } from "@mui/material";
+import { TableHead } from "@mui/material";
+import { TableRow } from "@mui/material";
+import { TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
+import { Paper } from "@mui/material";
+import { TableContainer } from "@mui/material";
 
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -50,7 +56,7 @@ console.log("idx => ", idx , " type => ", typeof idx)
 
 */
 
-var submatch_group_colors = ['yellow', 'blue', 'green', 'orange']
+var submatch_group_colors = ['yellow', 'cyan', 'pink', 'orange']
 
 function renderPattern(end_idx, pattern, submatch_idx) {
 	let patternStyles = []
@@ -78,8 +84,8 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 			//console.log("entering submatch %d", submatch_idx)
 			//extract the name of the subgroup, and see if it matched
 
-			let capture_name_start = pattern.indexOf(":", i+2) 
-			submatch_name = pattern.substring(capture_name_start+1, pattern.indexOf("}", capture_name_start+1))
+			let capture_name_start = pattern.indexOf(":", i + 2)
+			submatch_name = pattern.substring(capture_name_start + 1, pattern.indexOf("}", capture_name_start + 1))
 			console.log("entering submatch %s => %s", submatch_name, Object.keys(submatch_idx))
 			if (submatch_name in submatch_idx) {
 				console.log("submatch %s is go", submatch_name)
@@ -113,8 +119,8 @@ function colorFromKey(key) {
 	var output = 0
 	for (var i = 0, len = key.length; i < len; i++) {
 		output += key[i].charCodeAt(0)
-  }
-  return submatch_group_colors[output % submatch_group_colors.length]
+	}
+	return submatch_group_colors[output % submatch_group_colors.length]
 }
 
 //render the text with the correct color
@@ -128,6 +134,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 			dataStyles.push(
 				{ text: text[i], style: { color: 'red', fontWeight: 'bold' } }
 			)
+			continue
 		}
 		//Is the char part of a submatch ?
 
@@ -159,25 +166,38 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 	return dataStyles
 }
 
+const CustomTableCell = styled(TableCell)(({ color }) => ({
+	backgroundColor: color,
+  }));
+
+  
+
 const GrokDebugger = () => {
-	const [outputDictValue, setOutputDictValue] = React.useState('');
+	const [outputDictValue, setOutputDictValue] = React.useState([]);
 	const [error, setError] = React.useState('');
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
-  
+
 	const patternValue = useRef("");
 	const inputValue = useRef("");
-  
+
+	const columns = [
+		{ title: 'Pattern', field: 'pattern' },
+		{ title: 'Value', field: 'value' },
+	];
+
+
+
 	const handleExampleChange = (e) => {
-	  if (e === null) {
-		return
-	  }
-	  setGrokExample(e.target.value)
-	  const examplePattern = GrokPatternExamples[e.target.value]["pattern"];
-	  const exampleInput = GrokPatternExamples[e.target.value]["input"];
-	  patternValue.current.value = examplePattern;
-	  inputValue.current.value = exampleInput;
+		if (e === null) {
+			return
+		}
+		setGrokExample(e.target.value)
+		const examplePattern = GrokPatternExamples[e.target.value]["pattern"];
+		const exampleInput = GrokPatternExamples[e.target.value]["input"];
+		patternValue.current.value = examplePattern;
+		inputValue.current.value = exampleInput;
 	}
 
 	const HandleClick = () => {
@@ -214,7 +234,11 @@ const GrokDebugger = () => {
 
 		if (idx !== undefined) {
 			if (ret !== undefined) {
-				setOutputDictValue(JSON.stringify(ret, null, 2))
+				let data = []
+				for (const [key, value] of Object.entries(ret)) {
+					data.push({ pattern: key, value: value, color: colorFromKey(key)})
+				}
+				setOutputDictValue(data)
 			}
 
 			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current.value))
@@ -260,7 +284,27 @@ const GrokDebugger = () => {
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
 						<h1>Output</h1>
-						<div>{outputDictValue}</div>
+						<div>
+							<TableContainer component={Paper}>
+								<Table aria-label="simple table" size="small">
+									<TableHead>
+										<TableRow>
+											{columns.map((column) => (<TableCell>{column.title}</TableCell>))}
+										</TableRow>
+									</TableHead>
+									<TableBody>
+
+										{outputDictValue.filter(
+											(key) => {
+												return key.value !== "";
+											}).map((row) => (<TableRow key={row.pattern}>
+												<CustomTableCell color={row.color} align="right">{row.pattern}</CustomTableCell>
+												<CustomTableCell color={row.color} align="right">{row.value}</CustomTableCell>
+											</TableRow>))}
+									</TableBody>
+								</Table>
+							</TableContainer>
+						</div>
 						<h2> Grok Pattern results </h2>
 						<div className='grokResult'><RichTextDisplay styles={grokStyles} /></div>
 						<h2> Match data results </h2>
