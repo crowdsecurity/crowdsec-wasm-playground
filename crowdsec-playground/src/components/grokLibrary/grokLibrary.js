@@ -127,6 +127,7 @@ class GrokLibrary extends Component {
       page: 1,
       rowsPerPage: 10,
     };
+   this.props.onPatternUpdate(this.state.patterns)
   }
 
   async componentDidMount() {
@@ -178,6 +179,7 @@ class GrokLibrary extends Component {
         },
       }));
     }
+    this.props.onPatternUpdate(this.state.patterns);
     return [true, ""]
   }
 
