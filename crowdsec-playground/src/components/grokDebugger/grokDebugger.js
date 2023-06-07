@@ -18,6 +18,7 @@ import { TableCell } from "@mui/material";
 import { TableBody } from "@mui/material";
 import { Paper } from "@mui/material";
 import { TableContainer } from "@mui/material";
+import Box from '@mui/material/Box';
 
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -140,23 +141,14 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 
 		for (const [k, indexes] of Object.entries(submatch_idx)) {
 			if (i >= indexes[0] && i < indexes[1]) {
-				console.log("char %d is part of submatch %s", i, k)
+				//console.log("char %d is part of submatch %s", i, k)
 				dataStyles.push(
 					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(k) } }
 				)
 				continue nextchar
 			}
 		}
-		console.log("char %d is not part of submatch", i)
-		//let submatch = false
-		// for (let j = 0; j < submatch_idx.length; j++) {
-		// 	if (i >= submatch_idx[j][0] && i < submatch_idx[j][1]) {
-		// 		dataStyles.push(
-		// 			{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: submatch_group_colors[j] } }
-		// 		)
-		// 		continue nextchar
-		// 	}
-		// }
+		//console.log("char %d is not part of submatch", i)
 		//The char is matched, but not part of a submatch
 		dataStyles.push(
 			{ text: text[i], style: { color: 'green', fontWeight: 'bold' } }
@@ -234,10 +226,18 @@ const GrokDebugger = () => {
 
 		if (idx !== undefined) {
 			if (ret !== undefined) {
+				//we want to have consistent order in the table, so we rely on the submatch_index to order the table.
+				let mykeys = Object.keys(submatch_indexes)
+				mykeys.sort(function (a, b) {
+					return submatch_indexes[a][0] - submatch_indexes[b][0];
+				});
+
 				let data = []
-				for (const [key, value] of Object.entries(ret)) {
-					data.push({ pattern: key, value: value, color: colorFromKey(key)})
+				for (let i = 0; i < mykeys.length; i++) {
+					let key = mykeys[i]
+					data.push({ pattern: key, value: ret[key], color: colorFromKey(key), idx: mykeys.indexOf(key) })
 				}
+
 				setOutputDictValue(data)
 			}
 
@@ -283,13 +283,21 @@ const GrokDebugger = () => {
 							ref={inputValue}
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
+						<h2> Grok Pattern results </h2>
+						<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
+						<RichTextDisplay styles={grokStyles} />
+						</Box>
+						<h2> Match data results </h2>
+						<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
+						<RichTextDisplay styles={dataStyles} /> 
+						</Box>
 						<h1>Output</h1>
-						<div>
+						<Box display="flex" justifyContent="center" maxWidth="50%" margin="0 auto">
 							<TableContainer component={Paper}>
-								<Table aria-label="simple table" size="small">
+								<Table aria-label="simple table" size="small" width="50%">
 									<TableHead>
 										<TableRow>
-											{columns.map((column) => (<TableCell>{column.title}</TableCell>))}
+											{columns.map((column) => (<TableCell align="center">{column.title}</TableCell>))}
 										</TableRow>
 									</TableHead>
 									<TableBody>
@@ -297,18 +305,14 @@ const GrokDebugger = () => {
 										{outputDictValue.filter(
 											(key) => {
 												return key.value !== "";
-											}).map((row) => (<TableRow key={row.pattern}>
+											}).map((row) => (<TableRow key={row.idx}>
 												<CustomTableCell color={row.color} align="right">{row.pattern}</CustomTableCell>
-												<CustomTableCell color={row.color} align="right">{row.value}</CustomTableCell>
+												<CustomTableCell color={row.color} align="center">{row.value}</CustomTableCell>
 											</TableRow>))}
 									</TableBody>
 								</Table>
 							</TableContainer>
-						</div>
-						<h2> Grok Pattern results </h2>
-						<div className='grokResult'><RichTextDisplay styles={grokStyles} /></div>
-						<h2> Match data results </h2>
-						<div className='dataResult'><RichTextDisplay styles={dataStyles} /></div>
+						</Box>
 					</div>
 				</Item>
 			</Grid>
