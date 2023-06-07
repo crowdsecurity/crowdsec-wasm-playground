@@ -178,6 +178,7 @@ const GrokDebugger = () => {
 	const isInGrokPattern = useRef(false);
 	const loadedGrokPatterns = useRef({});
 	const [suggestedPatterns, setSuggestedPatterns] = React.useState([]);
+	var evaled = useRef(false);
 
 	const columns = [
 		{ title: 'Pattern', field: 'pattern' },
@@ -201,6 +202,7 @@ const GrokDebugger = () => {
 	}
 
 	const HandleClick = () => {
+		evaled.current = true;
 		setError('')
 		var ret = window.debugGrok(patternValue.current.value, inputValue.current.value)
 
@@ -334,7 +336,46 @@ const GrokDebugger = () => {
 		setSuggestedPatterns([]);
 	};
 
+	const renderPatternEvaluationResults = () => {
+		console.log("evaled: ", evaled)		
+		if (evaled.current === false) {
+			return null;
+		}
+		return (
+			<>
+			<h2> Grok Pattern results </h2>
+			<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
+			<RichTextDisplay styles={grokStyles} />
+			</Box>
+			<h2> Match data results </h2>
+			<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
+			<RichTextDisplay styles={dataStyles} /> 
+			</Box>
+			<h1>Output</h1>
+			<Box display="flex" justifyContent="center" maxWidth="50%" margin="0 auto">
+				<TableContainer component={Paper}>
+					<Table aria-label="simple table" size="small" width="50%">
+						<TableHead>
+							<TableRow>
+								{columns.map((column) => (<TableCell align="center">{column.title}</TableCell>))}
+							</TableRow>
+						</TableHead>
+						<TableBody>
 
+							{outputDictValue.filter(
+								(key) => {
+									return key.value !== "";
+								}).map((row) => (<TableRow key={row.idx}>
+									<CustomTableCell color={row.color} align="right">{row.pattern}</CustomTableCell>
+									<CustomTableCell color={row.color} align="center">{row.value}</CustomTableCell>
+								</TableRow>))}
+						</TableBody>
+					</Table>
+				</TableContainer>
+			</Box>
+			</>
+		)
+	}
 
 	return (
 		<Grid container spacing={2}>
@@ -375,36 +416,7 @@ const GrokDebugger = () => {
 							ref={inputValue}
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
-						<h2> Grok Pattern results </h2>
-						<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
-						<RichTextDisplay styles={grokStyles} />
-						</Box>
-						<h2> Match data results </h2>
-						<Box component="div" sx={{ p: 2, border: '1px dashed grey' }}>
-						<RichTextDisplay styles={dataStyles} /> 
-						</Box>
-						<h1>Output</h1>
-						<Box display="flex" justifyContent="center" maxWidth="50%" margin="0 auto">
-							<TableContainer component={Paper}>
-								<Table aria-label="simple table" size="small" width="50%">
-									<TableHead>
-										<TableRow>
-											{columns.map((column) => (<TableCell align="center">{column.title}</TableCell>))}
-										</TableRow>
-									</TableHead>
-									<TableBody>
-
-										{outputDictValue.filter(
-											(key) => {
-												return key.value !== "";
-											}).map((row) => (<TableRow key={row.idx}>
-												<CustomTableCell color={row.color} align="right">{row.pattern}</CustomTableCell>
-												<CustomTableCell color={row.color} align="center">{row.value}</CustomTableCell>
-											</TableRow>))}
-									</TableBody>
-								</Table>
-							</TableContainer>
-						</Box>
+						{ renderPatternEvaluationResults()}
 					</div>
 					<div
 						style={{
