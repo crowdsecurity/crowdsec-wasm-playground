@@ -87,16 +87,16 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 
 			let capture_name_start = pattern.indexOf(":", i + 2)
 			submatch_name = pattern.substring(capture_name_start + 1, pattern.indexOf("}", capture_name_start + 1))
-			console.log("entering submatch %s => %s", submatch_name, Object.keys(submatch_idx))
+			//console.log("entering submatch %s => %s", submatch_name, Object.keys(submatch_idx))
 			if (submatch_name in submatch_idx) {
-				console.log("submatch %s is go", submatch_name)
+				//console.log("submatch %s is go", submatch_name)
 				insubmatch = true
 			}
 		}
 
 		if (insubmatch === true && pattern[i - 1] === "}" && pattern[i - 2] !== "\\") {
 			insubmatch = false
-			console.log("leaving submatch %d", submatch_name)
+			//console.log("leaving submatch %d", submatch_name)
 		}
 
 		if (insubmatch === true) {

@@ -158,12 +158,12 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 		for k, v := range tmp_capture {
 			ret.Match[k] = v
 		}
-		fmt.Printf("full indexes : %v\n", submatch_indexes)
-		fmt.Printf("submatch map : %v\n", submatch_map)
+		//fmt.Printf("full indexes : %v\n", submatch_indexes)
+		//fmt.Printf("submatch map : %v\n", submatch_map)
 		ret.SubMatchIndexes = map[string][]int{}
 		for k, vidx := range submatch_map {
 
-			fmt.Printf("name (%s) ->  %d -> %v\n", k, vidx, submatch_indexes[vidx*2:vidx*2+2])
+			//fmt.Printf("name (%s) ->  %d -> %v\n", k, vidx, submatch_indexes[vidx*2:vidx*2+2])
 			couple := []int{submatch_indexes[vidx*2], submatch_indexes[vidx*2+1]}
 			//there wasn't a match for this group
 			if couple[0] == -1 || couple[1] == -1 {
@@ -189,7 +189,7 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 	prev_idx := 0
 	var prev_match = map[string]interface{}{}
 
-	fmt.Printf("let's goooooo\n")
+	//fmt.Printf("let's goooooo\n")
 	fmt.Printf("intput is '%s'\n", input)
 	fmt.Printf("pattern is '%s'\n", pattern)
 
@@ -200,7 +200,7 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 			(len(pattern)-1 == idx) {
 			//we got a pattern
 			subpattern := pattern[:idx+1]
-			fmt.Printf("subpattern : '%s'\n", subpattern)
+			//fmt.Printf("subpattern : '%s'\n", subpattern)
 			partial := isSubPattternOk(subpattern, input)
 			//if we cannot compile it, continue in search of valid pattern
 			if !partial.Compiles {
@@ -238,7 +238,7 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 				//return finalret
 			}
 		}
-		fmt.Printf("idx=%d / len=%d\n", idx, len(pattern))
+		//fmt.Printf("idx=%d / len=%d\n", idx, len(pattern))
 		idx++
 	}
 
