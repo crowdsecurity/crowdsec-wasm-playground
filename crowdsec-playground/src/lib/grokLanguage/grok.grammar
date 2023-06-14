@@ -1,0 +1,27 @@
+@top GrokExpression { expression* }
+
+expression {
+	String |
+	Pattern 
+}
+
+GrokStart {
+	"%{"
+}
+
+GrokEnd {
+	"}"
+}
+
+Pattern {
+    GrokStart GrokPattern (":" GrokSemantic)? GrokEnd
+}
+
+@tokens {
+	String { @asciiLetter+ }
+	GrokPattern { $[A-Za-z0-9_-]+ }
+	GrokSemantic { $[A-Za-z0-9_-]+ }
+	whitespace { $[ \n\r\t] }
+}
+
+@skip { whitespace }

@@ -19,9 +19,18 @@ import { TableBody } from "@mui/material";
 import { Paper } from "@mui/material";
 import { TableContainer } from "@mui/material";
 import Box from '@mui/material/Box';
-import getCaretCoordinates from 'textarea-caret';
 import { useEffect, useState } from 'react';
 import { Snackbar } from '@mui/material';
+
+
+import { grokLanguage } from '../../lib/grokLanguage/grokLanguage';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { EditorView } from 'codemirror';
+import { autocompletion } from '@codemirror/autocomplete';
+
+
+
 
 const StyledTextarea = styled(TextareaAutosize)({
 	width: '95%',
@@ -48,16 +57,6 @@ const GrokPatternExamples = {
 		"input": ""
 	}
 }
-
-/*
-console.log("idx => ", idx , " type => ", typeof idx)
-console.log("ret => ", ret , " type => ", typeof ret)
-console.log("error => ", error , " type => ", typeof error)
-console.log("start_idx => ", start_idx , " type => ", typeof start_idx)
-console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
-console.log("submatch indexes => ", submatch_indexes , " type => ", typeof submatch_indexes)
-
-*/
 
 var submatch_group_colors = ['yellow', 'cyan', 'pink', 'orange']
 
@@ -172,13 +171,10 @@ const GrokDebugger = () => {
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
-	const [inputPosition, setInputPosition] = React.useState({ top: 0, left: 0 });
 
 	const patternValue = useRef("");
 	const inputValue = useRef("");
-	const isInGrokPattern = useRef(false);
 	const loadedGrokPatterns = useRef({});
-	const [suggestedPatterns, setSuggestedPatterns] = React.useState([]);
 	const [open, setOpen] = useState(false);
 	var evaled = useRef(false);
 
@@ -304,84 +300,36 @@ const GrokDebugger = () => {
 		}
 	}
 
-	const HandlePatternChange = (e) => {
-		var currentValue = e.target.value;
-		var currentCursorPos = e.target.selectionStart;
-		if (currentCursorPos < 2) {
-			isInGrokPattern.current = false;
-			return;
-		}
-		if (currentValue[currentCursorPos - 1] === '{' && currentValue[currentCursorPos - 2] === '%') {
-			console.log("found start of grok pattern");
-			isInGrokPattern.current = true;
-		}
-		if (currentValue[currentCursorPos - 1] === '}') {
-			console.log("found end of grok pattern");
-			isInGrokPattern.current = false;
-		}
-
-		if (isInGrokPattern.current) {
-			var startPattern = currentValue.lastIndexOf('%{') + 2;
-			var grokPatternStart = currentValue.substring(startPattern, currentCursorPos);
-			console.log("checking for pattern start: ", grokPatternStart, " in: ", Object.keys(loadedGrokPatterns.current))
-			setSuggestedPatterns(Object.keys(loadedGrokPatterns.current).filter(pattern => pattern.startsWith(grokPatternStart)).sort().slice(0, 5));
-
-			var { top, left } = getCaretCoordinates(e.target, e.target.selectionEnd);
-
-			var textAreaCoords = e.target.getBoundingClientRect();
-
-			top = top + textAreaCoords.top + 20;
-			left = left + textAreaCoords.left;
-
-			console.log("top: ", top, " left: ", left)
-			// Set input position for floating suggestions window
-			setInputPosition({
-				top: top,
-				left: left,
-			});
-			console.log(e.key)
-			if (e.keyCode === 9 && suggestedPatterns.length > 0) {
-				e.preventDefault();
-				handlePatternSuggestionClick(suggestedPatterns[0]);
-			}
-		}
-		else {
-			setSuggestedPatterns([]); // Clear suggestions
-		}
+	const HandlePatternChange = (value) => {
+		patternValue.current.value = value;
 	};
 
+	const completion = async (context) => {
+		console.log(context)
 
-	const handlePatternSuggestionClick = (pattern) => {
-		var currentValue = patternValue.current.value;
-		var currentCursorPos = patternValue.current.selectionStart;
+		let word = context.matchBefore(/%{[^:}]*$/)
 
-		var precedingText = currentValue.substring(0, currentCursorPos);
-		var followingText = currentValue.substring(currentCursorPos);
+		if (word === null || word.from === word.to) {
+			return null
+		}
 
+		let cleanPattern = word.text.slice(2)
 
-		console.log("precedingText: ", precedingText)
-		console.log("followingText: ", followingText)
+		console.log(cleanPattern)
 
-		var lastPatternStart = precedingText.lastIndexOf('%{') + 2;
-		var nextPatternEnd = followingText.indexOf('}') + currentCursorPos + 1;
+		let matchingPatterns = Object.keys(loadedGrokPatterns.current).filter((pattern) => pattern.startsWith(cleanPattern)).sort().map((pattern) => ({ label: pattern, type: "text" })).slice(0, 10)
 
-		console.log("lastPatternStart: ", lastPatternStart, "(", precedingText[lastPatternStart], ")")
-		console.log("nextPatternEnd: ", nextPatternEnd, "(", followingText[nextPatternEnd], ")")
+		console.log(matchingPatterns)
+		console.log([
+			{ label: "match", type: "variable" },
+			{ label: "hello", type: "variable", info: "(World)" },
+			{ label: "magic", type: "text", apply: "⠁⭒*.✩.*⭒⠁", detail: "macro" }
+		])
 
-
-		console.log("before ", currentValue.substring(0, lastPatternStart))
-		console.log("pattern: ", pattern)
-		console.log("after ", currentValue.substring(nextPatternEnd))
-
-		var before = currentValue.substring(0, lastPatternStart)
-		var after = currentValue.substring(nextPatternEnd)
-
-		var newValue = before + pattern + after;
-
-		patternValue.current.value = newValue;
-
-		// Clear suggestions
-		setSuggestedPatterns([]);
+		return {
+			from: word.from + 2,
+			options: matchingPatterns
+		}
 	};
 
 	const renderPatternEvaluationResults = () => {
@@ -451,13 +399,20 @@ const GrokDebugger = () => {
 					<div>
 						{error && <Alert severity="error">An error occured while processing data: {error}.</Alert>}
 						<div align="left"><h1>Pattern</h1></div>
-						<StyledTextarea
-							minRows={1}
-							className="fixed-textarea"
-							placeholder="Grok Pattern"
+						<CodeMirror
 							ref={patternValue}
+							value={patternValue.current.value}
 							onChange={HandlePatternChange}
-							onKeyDown={(e) => { if (e.key === 'Tab' && suggestedPatterns.length > 0) { e.preventDefault(); handlePatternSuggestionClick(suggestedPatterns[0]); } }}
+							theme="dark"
+							extensions={[grokLanguage, EditorView.lineWrapping,
+								autocompletion({
+									override: [completion],
+									activateOnTyping: true
+								}),
+							]}
+							basicSetup={{ 'autocompletion': true }}
+							height='50px'
+							style={{ textAlign: 'left' }}
 						/>
 						<div align="left"><h1>Test Data</h1></div>
 						<StyledTextarea
@@ -475,22 +430,6 @@ const GrokDebugger = () => {
 							message="Copied to clipboard"
 						/>
 						{renderPatternEvaluationResults()}
-					</div>
-					<div
-						style={{
-							position: 'absolute',
-							top: inputPosition.top,
-							left: inputPosition.left,
-							zIndex: 1,
-							backgroundColor: 'white',
-							border: '1px solid black',
-						}}
-					>
-						{suggestedPatterns.map((pattern, index) => (
-							<div key={index} onClick={() => handlePatternSuggestionClick(pattern)}>
-								{pattern}
-							</div>
-						))}
 					</div>
 				</Item>
 			</Grid>
