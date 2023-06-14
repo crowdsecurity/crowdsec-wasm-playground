@@ -27,7 +27,7 @@ func formatAlert(this js.Value, args []js.Value) interface{} {
 	out, err := csplugin.FormatAlerts(template, alerts)
 
 	if err != nil {
-		return map[string]string{"error": err.Error()}
+		return map[string]interface{}{"error": err.Error()}
 	}
 
 	return map[string]interface{}{"out": out}
