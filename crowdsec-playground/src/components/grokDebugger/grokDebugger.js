@@ -19,7 +19,7 @@ import { TableBody } from "@mui/material";
 import { Paper } from "@mui/material";
 import { TableContainer } from "@mui/material";
 import Box from '@mui/material/Box';
-
+import "./style.css";
 import getCaretCoordinates from 'textarea-caret';
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -357,7 +357,7 @@ const GrokDebugger = () => {
 					<Table aria-label="simple table" size="small" width="50%">
 						<TableHead>
 							<TableRow>
-								{columns.map((column) => (<TableCell align="center">{column.title}</TableCell>))}
+								{columns.map((column) => (<TableCell className="whiteBold" align="center">{column.title}</TableCell>))}
 							</TableRow>
 						</TableHead>
 						<TableBody>
@@ -366,8 +366,8 @@ const GrokDebugger = () => {
 								(key) => {
 									return key.value !== "";
 								}).map((row) => (<TableRow key={row.idx}>
-									<CustomTableCell color={row.color} align="right">{row.pattern}</CustomTableCell>
-									<CustomTableCell color={row.color} align="center">{row.value}</CustomTableCell>
+									<CustomTableCell color={row.color} className="darkGreyBold" align="right">{row.pattern}</CustomTableCell>
+									<CustomTableCell color={row.color} className="darkGreyBold" align="center">{row.value}</CustomTableCell>
 								</TableRow>))}
 						</TableBody>
 					</Table>
