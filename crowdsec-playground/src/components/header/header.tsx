@@ -25,6 +25,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const pages = {
   'Grok Debugger': '/grok',
+  'Notification Templates': '/notifications',
 };
 
 function ResponsiveAppBar() {
