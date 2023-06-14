@@ -19,8 +19,8 @@ import { TableBody } from "@mui/material";
 import { Paper } from "@mui/material";
 import { TableContainer } from "@mui/material";
 import Box from '@mui/material/Box';
-import "./style.css";
 import getCaretCoordinates from 'textarea-caret';
+import { useEffect, useState } from 'react';
 
 const StyledTextarea = styled(TextareaAutosize)({
 	width: '95%',
@@ -185,6 +185,21 @@ const GrokDebugger = () => {
 		{ title: 'Value', field: 'value' },
 	];
 
+	useEffect(() => {
+		// Function to parse URL parameters
+		const parseURLParams = () => {
+		  const searchParams = new URLSearchParams(window.location.search);
+	
+		  const pattern = searchParams.get('pattern');
+		  const input = searchParams.get('input');
+		  
+	
+		  patternValue.current.value = pattern;
+		  inputValue.current.value = input;
+		};
+		parseURLParams();
+	}, []);
+
 	const handleExampleChange = (e) => {
 		if (e === null) {
 			return
@@ -199,6 +214,20 @@ const GrokDebugger = () => {
 	const refreshGrokPatterns = (patterns) => {
 		loadedGrokPatterns.current = patterns
 		console.log("patterns: ", patterns)
+	}
+
+	const HandleShare = () => {
+		const pattern = patternValue.current.value;
+		const input = inputValue.current.value;
+
+		// Encode the form values as query parameters
+		const queryParams = new URLSearchParams({ pattern, input });
+
+		// Generate the shared URL with the form values
+		const sharedUrl = `${window.location.origin}/shared-form?${queryParams}`;
+
+		// Open a new window or redirect to the shared URL
+		window.open(sharedUrl, '_blank');
 	}
 
 	const HandleClick = () => {
@@ -353,11 +382,14 @@ const GrokDebugger = () => {
 			</Box>
 			<h1>Output</h1>
 			<Box display="flex" justifyContent="center" maxWidth="50%" margin="0 auto">
-				<TableContainer className="darkGreyBold" component={Paper}>
+				<TableContainer component={Paper}>
 					<Table aria-label="simple table" size="small" width="50%">
 						<TableHead>
 							<TableRow>
-								{columns.map((column) => (<TableCell className="whiteBold" align="center">{column.title}</TableCell>))}
+							<TableCell style={{ fontWeight: 'bold'}} align="right">{columns[0].title}</TableCell>
+							<TableCell style={{ fontWeight: 'bold'}} align="center">{columns[1].title}</TableCell>	
+
+								{/* {columns.map((column) => (<TableCell style={{ fontWeight: 'bold'}} align="center">{column.title}</TableCell>))} */}
 							</TableRow>
 						</TableHead>
 						<TableBody>
@@ -366,8 +398,8 @@ const GrokDebugger = () => {
 								(key) => {
 									return key.value !== "";
 								}).map((row) => (<TableRow key={row.idx}>
-									<CustomTableCell color={row.color} className="darkGreyBold" align="right">{row.pattern}</CustomTableCell>
-									<CustomTableCell color={row.color} className="darkGreyBold" align="center">{row.value}</CustomTableCell>
+									<CustomTableCell color={row.color} style={{ color: '#444', fontWeight: 'bold' }} align="right">{row.pattern}</CustomTableCell>
+									<CustomTableCell color={row.color} style={{ color: '#444', fontWeight: 'bold' }} align="center">{row.value}</CustomTableCell>
 								</TableRow>))}
 						</TableBody>
 					</Table>
@@ -416,6 +448,7 @@ const GrokDebugger = () => {
 							ref={inputValue}
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
+						<div><Button variant="contained" onClick={HandleShare}>Share</Button></div>
 						{ renderPatternEvaluationResults()}
 					</div>
 					<div
