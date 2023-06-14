@@ -411,7 +411,6 @@ const GrokDebugger = () => {
 								}),
 							]}
 							basicSetup={{ 'autocompletion': true }}
-							height='50px'
 							style={{ textAlign: 'left' }}
 						/>
 						<div align="left"><h1>Test Data</h1></div>
