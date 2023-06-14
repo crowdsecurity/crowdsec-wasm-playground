@@ -171,9 +171,9 @@ const GrokDebugger = () => {
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
+	const [patternValue, setPatternValue] = React.useState('');
 
-	const patternValue = useRef("");
-	const inputValue = useRef("");
+	const inputValue = useRef(""); //FIXME: use state
 	const loadedGrokPatterns = useRef({});
 	const [open, setOpen] = useState(false);
 	var evaled = useRef(false);
@@ -200,7 +200,7 @@ const GrokDebugger = () => {
 				if (parsedData["pattern"] === undefined || parsedData["input"] === undefined) {
 					return;
 				}
-				patternValue.current.value = parsedData["pattern"];
+				setPatternValue(parsedData["pattern"]);
 				inputValue.current.value = parsedData["input"];
 				clearAnchorData();
 			}
@@ -215,7 +215,7 @@ const GrokDebugger = () => {
 		setGrokExample(e.target.value)
 		const examplePattern = GrokPatternExamples[e.target.value]["pattern"];
 		const exampleInput = GrokPatternExamples[e.target.value]["input"];
-		patternValue.current.value = examplePattern;
+		setPatternValue(examplePattern);
 		inputValue.current.value = exampleInput;
 	}
 
@@ -225,7 +225,7 @@ const GrokDebugger = () => {
 	}
 
 	const HandleShare = () => {
-		const pattern = patternValue.current.value;
+		const pattern = patternValue;
 		const input = inputValue.current.value;
 
 		const anchorData = JSON.stringify({ "pattern": pattern, "input": input });
@@ -248,7 +248,7 @@ const GrokDebugger = () => {
 	const HandleClick = () => {
 		evaled.current = true;
 		setError('')
-		var ret = window.debugGrok(patternValue.current.value, inputValue.current.value)
+		var ret = window.debugGrok(patternValue, inputValue.current.value)
 
 		console.log(ret)
 
@@ -296,13 +296,9 @@ const GrokDebugger = () => {
 			}
 
 			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current.value))
-			setGrokStyles(renderPattern(idx, patternValue.current.value, submatch_indexes))
+			setGrokStyles(renderPattern(idx, patternValue, submatch_indexes))
 		}
 	}
-
-	const HandlePatternChange = (value) => {
-		patternValue.current.value = value;
-	};
 
 	const completion = async (context) => {
 		console.log(context)
@@ -400,9 +396,8 @@ const GrokDebugger = () => {
 						{error && <Alert severity="error">An error occured while processing data: {error}.</Alert>}
 						<div align="left"><h1>Pattern</h1></div>
 						<CodeMirror
-							ref={patternValue}
-							value={patternValue.current.value}
-							onChange={HandlePatternChange}
+							value={patternValue}
+							onChange={value => setPatternValue(value)}
 							theme="dark"
 							extensions={[grokLanguage, EditorView.lineWrapping,
 								autocompletion({
