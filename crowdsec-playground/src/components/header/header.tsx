@@ -9,6 +9,7 @@ import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { styled } from '@mui/system';
+import { GitHub } from '@mui/icons-material';
 
 import { ReactComponent as CrowdsecLogo } from '../../crowdsec.svg';
 import { Link } from 'react-router-dom';
@@ -78,6 +79,16 @@ function ResponsiveAppBar() {
           >
             Crowdsec Playground
           </Typography>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="GitHub"
+            href="https://github.com/crowdsecurity/crowdsec-wasm-playground"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+          <GitHub />
+          </IconButton>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             {Object.keys(pages).map((page) => (
               <StyledButton component={Link} to={pages[page]} key={page}>

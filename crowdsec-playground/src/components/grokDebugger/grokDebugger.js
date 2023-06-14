@@ -38,7 +38,7 @@ const GrokPatternExamples = {
 		"pattern": `(%{IPORHOST:target_fqdn} )?%{IPORHOST:remote_addr} - (%{NGUSER:remote_user})? \\[%{HTTPDATE:time_local}\\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:http_version}" %{NUMBER:status} %{NUMBER:body_bytes_sent} "%{NOTDQUOTE:http_referer}" "%{NOTDQUOTE:http_user_agent}"( %{NUMBER:request_length} %{NUMBER:request_time} \\[%{DATA:proxy_upstream_name}\\] \\[%{DATA:proxy_alternative_upstream_name}\\])?`,
 		"input": `1.2.3.4 - - [31/May/2023:16:45:28 +0000] "GET /upload/server/php/ HTTP/1.1" 301 178 "-" "python-requests/2.31.0"`
 	},
-	"SSH": {
+	"simple": {
 		"pattern": "%{WORD:foo} %{WORD:bar}",
 		"input": "hello world"
 	},
@@ -353,7 +353,7 @@ const GrokDebugger = () => {
 			</Box>
 			<h1>Output</h1>
 			<Box display="flex" justifyContent="center" maxWidth="50%" margin="0 auto">
-				<TableContainer component={Paper}>
+				<TableContainer className="darkGreyBold" component={Paper}>
 					<Table aria-label="simple table" size="small" width="50%">
 						<TableHead>
 							<TableRow>
@@ -379,7 +379,7 @@ const GrokDebugger = () => {
 
 	return (
 		<Grid container spacing={2}>
-			<Grid container justifyContent="flex-end">
+			<Grid container style={{padding: "20px"}} justifyContent="flex-end">
 				<h2>Examples</h2>
 				<FormControl sx={{ m: 1, minWidth: 120 }}>
 					<InputLabel id="demo-simple-select-label">Example</InputLabel>
@@ -391,7 +391,7 @@ const GrokDebugger = () => {
 					>
 						<MenuItem value=""><em>None</em></MenuItem>
 						<MenuItem value="nginx">Nginx</MenuItem>
-						<MenuItem value="SSH">SSH</MenuItem>
+						<MenuItem value="simple">Simple</MenuItem>
 					</Select>
 				</FormControl>
 			</Grid>
