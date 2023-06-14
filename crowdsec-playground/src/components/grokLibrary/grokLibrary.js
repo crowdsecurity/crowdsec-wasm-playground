@@ -117,6 +117,86 @@ class AddPatternComponent extends Component {
   }
 }
 
+class EditPatternComponent extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      PatternKey: props.patternKey,
+      PatternValue: props.patternValue,
+      dialogOpen: false,
+      errMsg: '',
+    };
+  }
+
+  handleInputChange = (event) => {
+    this.setState({
+      "PatternValue": event.target.value,
+    });
+  }
+
+  handleOpenDialog = () => {
+    this.setState({
+      dialogOpen: true,
+    });
+  }
+
+  handleCloseDialog = () => {
+    this.setState({
+      dialogOpen: false,
+    });
+  }
+
+  handleSubmit = () => {
+    let [ret, errValue] = this.props.editPattern(this.state.PatternKey, this.state.PatternValue);
+    if (ret === false) {
+      console.log("Error adding editing in submit: ", errValue)
+      this.setState({ errMsg: errValue });
+      return
+    }
+    this.handleCloseDialog();
+    this.setState({ errMsg: '' });
+  }
+
+  render() {
+    return (
+      <>
+        <Button
+          onClick={this.handleOpenDialog}
+          variant="contained"
+          color="primary"
+        >
+          Edit Pattern
+        </Button>
+        <Dialog open={this.state.dialogOpen} onClose={this.handleCloseDialog}>
+          <DialogTitle>Edit Pattern</DialogTitle>
+          <DialogContent>
+            {this.state.PatternKey}
+            <TextField
+              margin="dense"
+              name="newPatternValue"
+              value={this.state.PatternValue}
+              onChange={this.handleInputChange}
+              label="Pattern Value"
+              fullWidth
+            />
+            {this.state.errMsg && <Alert severity="error">An error occured while editing the pattern: {this.state.errMsg}.</Alert>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} color="primary">
+              Edit
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </>
+    )
+  }
+}
+
+
 class GrokLibrary extends Component {
   constructor(props) {
     super(props);
@@ -127,7 +207,7 @@ class GrokLibrary extends Component {
       page: 1,
       rowsPerPage: 10,
     };
-   this.props.onPatternUpdate(this.state.patterns)
+    this.props.onPatternUpdate(this.state.patterns)
   }
 
   async componentDidMount() {
@@ -167,7 +247,7 @@ class GrokLibrary extends Component {
 
   addPattern = (patternKey, patternValue) => {
     if (patternKey && patternValue) {
-      let ret = window.addPattern(patternKey, patternKey);
+      let ret = window.addPattern(patternKey, patternValue);
       if (ret.error !== undefined) {
         console.log("Error adding pattern: ", ret.error)
         return [false, ret.error]
@@ -177,18 +257,29 @@ class GrokLibrary extends Component {
           ...prevState.patterns,
           [patternKey]: patternValue,
         },
-      }));
+      }), () => {
+        this.props.onPatternUpdate(this.state.patterns);
+      });
     }
-    this.props.onPatternUpdate(this.state.patterns);
+
     return [true, ""]
   }
 
-  deletePattern = (key) => {
-    this.setState(prevState => {
-      let patterns = { ...prevState.patterns };
-      delete patterns[key];
-      return { patterns };
+  editPattern = (patternKey, patternValue) => {
+    let ret = window.editPattern(patternKey, patternValue);
+    if (ret.error !== undefined) {
+      console.log("Error editing pattern: ", ret.error)
+      return [false, ret.error]
+    }
+    this.setState(prevState => ({
+      patterns: {
+        ...prevState.patterns,
+        [patternKey]: patternValue,
+      },
+    }), () => {
+      this.props.onPatternUpdate(this.state.patterns)
     });
+    return [true, ""]
   }
 
   handlePageChange = (event, page) => {
@@ -237,9 +328,8 @@ class GrokLibrary extends Component {
                 {currentPagePatternKeys.map((key, index) => (
                   <>
                     <TableRow
-                      key={index}
+                      key={key}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      onClick={() => this.state.patternsOpenState[key] === true ? this.handleClose(key) : this.handleOpen(key)}
                     >
                       <TableCell component="th" scope="row">
                         <IconButton
@@ -252,7 +342,7 @@ class GrokLibrary extends Component {
                         >
                           <ExpandMoreIcon
                             style={{
-                              transform: this.state.patternsOpenState[key] ? 'rotate(0deg)' : 'rotate(270deg)',
+                              transform: this.state.patternsOpenState[key] ? 'rotate(360deg)' : 'rotate(270deg)',
                               transition: 'transform 0.1s',
                             }}
                           />
@@ -260,13 +350,7 @@ class GrokLibrary extends Component {
                         {key}
                       </TableCell>
                       <TableCell align="right">
-                        <Button
-                          onClick={(event) => { event.stopPropagation(); this.deletePattern(key) }}
-                          variant="contained"
-                          color="secondary"
-                        >
-                          Delete
-                        </Button>
+                        <EditPatternComponent patternKey={key} patternValue={this.state.patterns[key]} editPattern={this.editPattern} />
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -287,18 +371,18 @@ class GrokLibrary extends Component {
           </div>
         </TableContainer>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-        <Pagination count={Math.ceil(patternKeys.length / rowsPerPage)} page={page} onChange={this.handlePageChange}/>
-        Number of items per page:
-        <Select
-          value={rowsPerPage}
-          onChange={this.handleRowsPerPageChange}
-        >
-          {[10, 20, 30, 50].map((num) => (
-            <MenuItem key={num} value={num}>
-              {num}
-            </MenuItem>
-          ))}
-        </Select>
+          <Pagination count={Math.ceil(patternKeys.length / rowsPerPage)} page={page} onChange={this.handlePageChange} />
+          Number of items per page:
+          <Select
+            value={rowsPerPage}
+            onChange={this.handleRowsPerPageChange}
+          >
+            {[10, 20, 30, 50].map((num) => (
+              <MenuItem key={num} value={num}>
+                {num}
+              </MenuItem>
+            ))}
+          </Select>
         </div>
       </div>
     );

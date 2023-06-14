@@ -135,7 +135,7 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 
 	_, err := Grok.Compile(pattern)
 	if err != nil {
-		fmt.Printf("subpattern '%s' is INVALID\n", pattern)
+		fmt.Printf("subpattern '%s' is INVALID: %s\n", pattern, err)
 		return ret
 	}
 	ret.Compiles = true
@@ -301,18 +301,20 @@ func addPattern(this js.Value, args []js.Value) interface{} {
 	return map[string]interface{}{"success": true}
 }
 
-/*func deletePattern(this js.Value, args []js.Value) interface{} {
-	if len(args) != 1 {
+func editPattern(this js.Value, args []js.Value) interface{} {
+	if len(args) != 2 {
 		return map[string]string{"error": "Invalid no of arguments passed"}
 	}
-	name := args[0].String()
-	err := Grok.Delete(name)
+	pattern := args[0].String()
+	value := args[1].String()
+	err := Grok.Edit(pattern, value)
 	if err != nil {
-		fmt.Printf("error while deleting grok pattern %s : %s\n", name, err)
+		fmt.Printf("error while editing grok pattern %s : %s\n", pattern, err)
 		return map[string]interface{}{"error": err.Error()}
 	}
+	fmt.Printf("Pattern %s is now %s\n", pattern, Grok.Patterns[pattern])
 	return map[string]interface{}{"success": true}
-}*/
+}
 
 func RegisterJSFuncs() {
 	js.Global().Set("grokInit", js.FuncOf(grokInit))
@@ -321,5 +323,5 @@ func RegisterJSFuncs() {
 	js.Global().Set("debugGrok", js.FuncOf(debugGrok))
 	js.Global().Set("getGrokPatterns", js.FuncOf(getGrokPatterns))
 	js.Global().Set("addPattern", js.FuncOf(addPattern))
-	//js.Global().Set("deletePattern", js.FuncOf(deletePattern))
+	js.Global().Set("editPattern", js.FuncOf(editPattern))
 }

@@ -12,6 +12,8 @@ github.com/crowdsecurity/grokky v0.2.2-0.20230531152645-3c7756002a44 h1:xGcoZE/K
 github.com/crowdsecurity/grokky v0.2.2-0.20230531152645-3c7756002a44/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
 github.com/crowdsecurity/grokky v0.2.2-0.20230601135617-e5282c6c91ec h1:SenFg6akDrWhOqICnuk2ktyJq6Okg/FKZ7LO8rfQfc4=
 github.com/crowdsecurity/grokky v0.2.2-0.20230601135617-e5282c6c91ec/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
+github.com/crowdsecurity/grokky v0.2.2-0.20230614194034-3bb20f62e4df h1:Lnj+jk3yoqO2nJwAw2frAU0YdbViJuiZcKXJWyW91a8=
+github.com/crowdsecurity/grokky v0.2.2-0.20230614194034-3bb20f62e4df/go.mod h1:33usDIYzGDsgX1kHAThCbseso6JuWNJXOzRQDGXHtWM=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/magefile/mage v1.14.0 h1:6QDX3g6z1YvJ4olPhT1wksUcSa/V0a1B+pJb73fBjyo=
@@ -22,6 +24,8 @@ github.com/tetratelabs/wazero v1.0.0-rc.2 h1:OA3UUynnoqxrjCQ94mpAtdO4/oMxFQVNL2B
 github.com/tetratelabs/wazero v1.0.0-rc.2/go.mod h1:wYx2gNRg8/WihJfSDxA1TIL8H+GkfLYm+bIfbblu9VQ=
 github.com/tetratelabs/wazero v1.1.0 h1:EByoAhC+QcYpwSZJSs/aV0uokxPwBgKxfiokSUwAknQ=
 github.com/tetratelabs/wazero v1.1.0/go.mod h1:wYx2gNRg8/WihJfSDxA1TIL8H+GkfLYm+bIfbblu9VQ=
+github.com/tetratelabs/wazero v1.2.0 h1:I/8LMf4YkCZ3r2XaL9whhA0VMyAvF6QE+O7rco0DCeQ=
+github.com/tetratelabs/wazero v1.2.0/go.mod h1:wYx2gNRg8/WihJfSDxA1TIL8H+GkfLYm+bIfbblu9VQ=
 github.com/wasilibs/go-re2 v0.2.1 h1:bZVXxlqGHXnHlQt5ys6CsHyypsCsP952m1oKBB5O9Dc=
 github.com/wasilibs/go-re2 v0.2.1/go.mod h1:jrB0h+KSTmTwsL0lI2sEyu8TcRi1htLiR/TbSURMwMM=
 github.com/wasilibs/go-re2 v1.1.0 h1:RF/qHrnaFRIYaxnDFIZ4I8cZJTU+wE9DkOHtEHOUA18=

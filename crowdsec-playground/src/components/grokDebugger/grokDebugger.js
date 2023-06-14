@@ -301,27 +301,12 @@ const GrokDebugger = () => {
 	}
 
 	const completion = async (context) => {
-		console.log(context)
-
 		let word = context.matchBefore(/%{[^:}]*$/)
-
 		if (word === null || word.from === word.to) {
 			return null
 		}
-
 		let cleanPattern = word.text.slice(2)
-
-		console.log(cleanPattern)
-
 		let matchingPatterns = Object.keys(loadedGrokPatterns.current).filter((pattern) => pattern.startsWith(cleanPattern)).sort().map((pattern) => ({ label: pattern, type: "text" })).slice(0, 10)
-
-		console.log(matchingPatterns)
-		console.log([
-			{ label: "match", type: "variable" },
-			{ label: "hello", type: "variable", info: "(World)" },
-			{ label: "magic", type: "text", apply: "⠁⭒*.✩.*⭒⠁", detail: "macro" }
-		])
-
 		return {
 			from: word.from + 2,
 			options: matchingPatterns

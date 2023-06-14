@@ -3,7 +3,7 @@ module grokker
 go 1.20
 
 require (
-	github.com/crowdsecurity/grokky v0.2.2-0.20230601135617-e5282c6c91ec
+	github.com/crowdsecurity/grokky v0.2.2-0.20230614194034-3bb20f62e4df
 	github.com/davecgh/go-spew v1.1.1
 )
 
