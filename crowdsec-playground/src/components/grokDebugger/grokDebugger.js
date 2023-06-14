@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 
 import Button from '@mui/base/Button';
-import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { Alert, InputLabel } from '@mui/material';
 import { styled } from '@mui/system';
 import { Grid } from '@mui/material';
@@ -27,21 +26,9 @@ import { grokLanguage } from '../../lib/grokLanguage/grokLanguage';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from 'codemirror';
+import { EditorState } from '@codemirror/state';
 import { autocompletion } from '@codemirror/autocomplete';
 
-
-
-
-const StyledTextarea = styled(TextareaAutosize)({
-	width: '95%',
-	borderRadius: '25px',
-	padding: '12px 24px',
-	border: '1px solid #ccc',
-	'&:focus': {
-		borderColor: 'black',
-		outline: 'none',
-	},
-});
 
 const GrokPatternExamples = {
 	"nginx": {
@@ -172,8 +159,9 @@ const GrokDebugger = () => {
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
 	const [patternValue, setPatternValue] = React.useState('');
+	const [inputValue, setInputValue] = React.useState('');
 
-	const inputValue = useRef(""); //FIXME: use state
+
 	const loadedGrokPatterns = useRef({});
 	const [open, setOpen] = useState(false);
 	var evaled = useRef(false);
@@ -201,7 +189,7 @@ const GrokDebugger = () => {
 					return;
 				}
 				setPatternValue(parsedData["pattern"]);
-				inputValue.current.value = parsedData["input"];
+				setInputValue(parsedData["input"]);
 				clearAnchorData();
 			}
 		};
@@ -216,7 +204,7 @@ const GrokDebugger = () => {
 		const examplePattern = GrokPatternExamples[e.target.value]["pattern"];
 		const exampleInput = GrokPatternExamples[e.target.value]["input"];
 		setPatternValue(examplePattern);
-		inputValue.current.value = exampleInput;
+		setInputValue(exampleInput);
 	}
 
 	const refreshGrokPatterns = (patterns) => {
@@ -226,7 +214,7 @@ const GrokDebugger = () => {
 
 	const HandleShare = () => {
 		const pattern = patternValue;
-		const input = inputValue.current.value;
+		const input = inputValue;
 
 		const anchorData = JSON.stringify({ "pattern": pattern, "input": input });
 		window.location.hash += "?" + encodeURIComponent(anchorData);
@@ -248,7 +236,7 @@ const GrokDebugger = () => {
 	const HandleClick = () => {
 		evaled.current = true;
 		setError('')
-		var ret = window.debugGrok(patternValue, inputValue.current.value)
+		var ret = window.debugGrok(patternValue, inputValue)
 
 		console.log(ret)
 
@@ -295,7 +283,7 @@ const GrokDebugger = () => {
 				setOutputDictValue(data)
 			}
 
-			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue.current.value))
+			setDataStyles(renderText(start_idx, end_idx, submatch_indexes, inputValue))
 			setGrokStyles(renderPattern(idx, patternValue, submatch_indexes))
 		}
 	}
@@ -389,16 +377,30 @@ const GrokDebugger = () => {
 									override: [completion],
 									activateOnTyping: true
 								}),
+								EditorState.changeFilter.of((tr) => {
+									if (tr.newDoc.sliceString(0).split('\n').length > 1) {
+										return false
+									}
+									return true
+								})
 							]}
 							basicSetup={{ 'autocompletion': true }}
 							style={{ textAlign: 'left' }}
 						/>
 						<div align="left"><h1>Test Data</h1></div>
-						<StyledTextarea
-							minRows={3}
-							className='fixed-textarea'
-							placeholder="Input"
-							ref={inputValue}
+						<CodeMirror
+							value={inputValue}
+							onChange={value => setInputValue(value)}
+							theme="dark"
+							extensions={[EditorView.lineWrapping,
+							EditorState.changeFilter.of((tr) => {
+								if (tr.newDoc.sliceString(0).split('\n').length > 1) {
+									return false
+								}
+								return true
+							})]}
+							style={{ textAlign: 'left' }}
+
 						/>
 						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
 						<div><Button variant="contained" onClick={HandleShare}>Share</Button></div>
