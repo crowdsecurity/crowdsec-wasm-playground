@@ -21,7 +21,7 @@ import { TableContainer } from "@mui/material";
 import Box from '@mui/material/Box';
 import getCaretCoordinates from 'textarea-caret';
 import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Snackbar } from '@mui/material';
 
 const StyledTextarea = styled(TextareaAutosize)({
 	width: '95%',
@@ -179,6 +179,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 							const isInGrokPattern = useRef(false);
 							const loadedGrokPatterns = useRef({});
 							const [suggestedPatterns, setSuggestedPatterns] = React.useState([]);
+							const [open, setOpen] = useState(false);
 							var evaled = useRef(false);
 							
 							const columns = [
@@ -188,6 +189,9 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 							
 							useEffect(() => {
 								// Function to parse URL parameters
+								const clearAnchorData = () => {
+									window.history.replaceState({}, document.title, window.location.pathname);
+								  };
 								const parseAnchorData = () => {
 									const anchorData = window.location.hash.slice(1);
 									if (!anchorData) {
@@ -202,7 +206,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 										}
 										patternValue.current.value = parsedData["pattern"];
 										inputValue.current.value = parsedData["input"];
-
+										clearAnchorData();
 									}
 								};
 								parseAnchorData();
@@ -230,8 +234,21 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 								
 								const anchorData = JSON.stringify({ "pattern": pattern, "input": input });
 								window.location.hash += "?" + encodeURIComponent(anchorData);
+								navigator.clipboard.writeText(window.location)
+								.then(() => {
+									setOpen(true);
+								})
+								.catch((error) => {
+									console.error('Failed to copy data to clipboard:', error);
+								});
 							}
+							const handleClose = (event, reason) => {
+								if (reason === 'clickaway') {
+								  return;
+								}
 							
+								setOpen(false);
+							  };
 							const HandleClick = () => {
 								evaled.current = true;
 								setError('')
@@ -451,6 +468,12 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 											/>
 											<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
 											<div><Button variant="contained" onClick={HandleShare}>Share</Button></div>
+											<Snackbar
+											open={open}
+											autoHideDuration={3000}
+											onClose={handleClose}
+											message="Copied to clipboard"
+											/>
 											{ renderPatternEvaluationResults()}
 											</div>
 											<div
