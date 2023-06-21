@@ -45,7 +45,7 @@ const GrokPatternExamples = {
 	}
 }
 
-var submatch_group_colors = ['yellow', 'cyan', 'pink', 'orange']
+var submatch_group_colors = ['#bc4b51', '#5b8e7d', '#f4a259', '#8cb369']
 
 function renderPattern(end_idx, pattern, submatch_idx) {
 	let patternStyles = []
@@ -173,9 +173,9 @@ const GrokDebugger = () => {
 
 	useEffect(() => {
 		// Function to parse URL parameters
-		const clearAnchorData = () => {
-			window.history.replaceState({}, document.title, window.location.pathname);
-		};
+		// const clearAnchorData = () => {
+		// 	window.history.replaceState({}, document.title, window.location.pathname);
+		// };
 		const parseAnchorData = () => {
 			const anchorData = window.location.hash.slice(1);
 			if (!anchorData) {
@@ -190,7 +190,9 @@ const GrokDebugger = () => {
 				}
 				setPatternValue(parsedData["pattern"]);
 				setInputValue(parsedData["input"]);
-				clearAnchorData();
+				//clear extra anchor data
+				let prefix = 
+				window.location.hash = window.location.hash.split("?")[0]
 			}
 		};
 		parseAnchorData();
@@ -216,8 +218,10 @@ const GrokDebugger = () => {
 		const pattern = patternValue;
 		const input = inputValue;
 
+		//extract the anchor url, and append the data to it
+		let prefix = window.location.hash.split("?")[0]
 		const anchorData = JSON.stringify({ "pattern": pattern, "input": input });
-		window.location.hash += "?" + encodeURIComponent(anchorData);
+		window.location.hash = prefix + "?" + encodeURIComponent(anchorData);
 		navigator.clipboard.writeText(window.location)
 			.then(() => {
 				setOpen(true);
