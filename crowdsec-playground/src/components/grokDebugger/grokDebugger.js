@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 
 import Button from '@mui/base/Button';
-import { Alert, InputLabel } from '@mui/material';
+import { Alert, InputLabel, ButtonGroup, IconButton, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { Grid } from '@mui/material';
 import Item from '@mui/material/Grid';
@@ -20,6 +20,7 @@ import { TableContainer } from "@mui/material";
 import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 import { Snackbar } from '@mui/material';
+import { Share, Settings } from '@mui/icons-material';
 
 
 import { grokLanguage } from '../../lib/grokLanguage/grokLanguage';
@@ -406,8 +407,17 @@ const GrokDebugger = () => {
 							style={{ textAlign: 'left' }}
 
 						/>
-						<div><Button variant="contained" onClick={HandleClick}>Run</Button></div>
-						<div><Button variant="contained" onClick={HandleShare}>Share</Button></div>
+						 <ButtonGroup>
+						 <IconButton color="primary" onClick={HandleClick} aria-label="Run" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+							<Settings sx={{ fontSize: 24 }} />
+							<Typography variant="button">Run</Typography>
+						</IconButton>
+
+						<IconButton color="secondary" onClick={HandleShare} aria-label="Share" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+							<Share sx={{ fontSize: 24 }} />
+							<Typography variant="button">Share</Typography>
+						</IconButton>
+						</ButtonGroup>
 						<Snackbar
 							open={open}
 							autoHideDuration={3000}
