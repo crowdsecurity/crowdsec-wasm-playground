@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 
-import Button from '@mui/base/Button';
 import { Alert, InputLabel, ButtonGroup, IconButton, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { Grid } from '@mui/material';
@@ -192,7 +191,6 @@ const GrokDebugger = () => {
 				setPatternValue(parsedData["pattern"]);
 				setInputValue(parsedData["input"]);
 				//clear extra anchor data
-				let prefix = 
 				window.location.hash = window.location.hash.split("?")[0]
 			}
 		};
