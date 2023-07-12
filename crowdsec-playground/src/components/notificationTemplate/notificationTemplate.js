@@ -6,6 +6,7 @@ import Item from '@mui/material/Grid';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
+import { json } from '@codemirror/lang-json';
 
 
 
@@ -35,7 +36,10 @@ function NotificationTemplate() {
 							theme={'dark'}
 							value={alert}
 							onChange={value => setAlert(value)}
-							extensions={[EditorView.lineWrapping]}
+							extensions={[json, EditorView.lineWrapping]}
+							basicSetup={{
+								foldGutter: true,
+							}}
 							style={{ textAlign: "left" }}
 						/>
 					</Item>
