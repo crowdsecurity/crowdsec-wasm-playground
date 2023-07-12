@@ -2,11 +2,12 @@
   "name": "crowdsec-playground",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://crowdsecurity.github.io/crowdsec-wasm-playground/",
+  "homepage": "https://playground.crowdsec.net",
   "dependencies": {
     "@codemirror/autocomplete": "^6.8.0",
     "@codemirror/highlight": "^0.19.8",
     "@codemirror/language-data": "^6.3.1",
+    "@codemirror/state": "^6.2.1",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@lezer/generator": "^1.2.4",
