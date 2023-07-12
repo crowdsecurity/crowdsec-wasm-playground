@@ -36,7 +36,7 @@ function NotificationTemplate() {
 							theme={'dark'}
 							value={alert}
 							onChange={value => setAlert(value)}
-							extensions={[json, EditorView.lineWrapping]}
+							extensions={[json(), EditorView.lineWrapping]}
 							basicSetup={{
 								foldGutter: true,
 							}}
