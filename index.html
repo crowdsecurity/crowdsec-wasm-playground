@@ -8,7 +8,7 @@
                 go.run(result.instance);
                 grokInit()
             }).catch( error => {
-                console.log("ouch", error)
+                console.log("error loading web assembly", error)
             })
         </script>
     </head>
@@ -46,17 +46,10 @@
             validation_output.value = validateGrok(input)
         }
         var parse = function(pattern, input) {
-            zz = runGrok(pattern, input)
-            console.log("res => ", zz)
-            console.log("restype => ", typeof zz)
-            zzsr = JSON.stringify(zz)
-            console.log("stringified res => ", zzsr)
-            console.log("sringified resype =>", typeof zzsr)
-            grok_result.value = zzsr
+            grok_result.value = JSON.stringify(runGrok(pattern, input))
         }
 
         var debuggrok = function(pattern, input) {
-            //document.getElementById('test_result').innerHTML = '<h1> lol </h1>';
 
             ret = debugGrok(pattern, input)
             idx = ret["__idx"]
@@ -69,15 +62,7 @@
             delete ret["__idx_end"]
             submatch_indexes = JSON.parse(ret["__submatches_idx"])
             delete ret["__submatches_idx"]
-
-            console.log("idx => ", idx , " type => ", typeof idx)
-            console.log("ret => ", ret , " type => ", typeof ret)
-            console.log("error => ", error , " type => ", typeof error)
-            console.log("start_idx => ", start_idx , " type => ", typeof start_idx)
-            console.log("end_idx => ", end_idx , " type => ", typeof end_idx)
-            console.log("submatch indexes => ", submatch_indexes , " type => ", typeof submatch_indexes)
-
-            
+    
             if (error != "") {
                 document.getElementById('test_result').innerHTML = error;
                 return
@@ -96,11 +81,9 @@
                 /*render text properly*/
                 for (i = 0; i < input.length; i++) {
                     bold = false
-                    console.log("sumatch indexes => ", ret["__submatches_idx"])
                     for (j = 0; j < submatch_indexes.length; j++) {
                         if (i >= submatch_indexes[j][0] && i < submatch_indexes[j][1]) {
                             bold = true
-                            console.log("index %d is in [%d,%d]", i, submatch_indexes[j][0], submatch_indexes[j][1])
                             z += "<b>"
                             break
                         }

@@ -55,13 +55,11 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 
 	//-1 means full match
 	if (end_idx === -1) {
-		console.log("full match!")
 		end_idx = pattern.length
 	}
 
 	for (let i = 0; i < pattern.length; i++) {
 		if (i > end_idx) {
-			//console.log("after pattern")
 			patternStyles.push(
 				{ text: pattern[i], style: { color: 'red', fontWeight: 'bold' } }
 			)
@@ -70,25 +68,20 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 
 		//identify if we're in or out of a submatch
 		if (pattern[i] === "%" && pattern[i + 1] === "{") {
-			//console.log("entering submatch %d", submatch_idx)
 			//extract the name of the subgroup, and see if it matched
 
 			let capture_name_start = pattern.indexOf(":", i + 2)
 			submatch_name = pattern.substring(capture_name_start + 1, pattern.indexOf("}", capture_name_start + 1))
-			//console.log("entering submatch %s => %s", submatch_name, Object.keys(submatch_idx))
 			if (submatch_name in submatch_idx) {
-				//console.log("submatch %s is go", submatch_name)
 				insubmatch = true
 			}
 		}
 
 		if (insubmatch === true && pattern[i - 1] === "}" && pattern[i - 2] !== "\\") {
 			insubmatch = false
-			//console.log("leaving submatch %d", submatch_name)
 		}
 
 		if (insubmatch === true) {
-			//console.log("in submatch %d", submatch_idx)
 			patternStyles.push(
 				{ text: pattern[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(submatch_name) } }
 			)
@@ -96,7 +89,6 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		}
 
 		//we're not in a submatch, but we're matched
-		//console.log("in match")
 		patternStyles.push(
 			{ text: pattern[i], style: { color: 'green', fontWeight: 'bold' } }
 		)
@@ -129,14 +121,12 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 
 		for (const [k, indexes] of Object.entries(submatch_idx)) {
 			if (i >= indexes[0] && i < indexes[1]) {
-				//console.log("char %d is part of submatch %s", i, k)
 				dataStyles.push(
 					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(k) } }
 				)
 				continue nextchar
 			}
 		}
-		//console.log("char %d is not part of submatch", i)
 		//The char is matched, but not part of a submatch
 		dataStyles.push(
 			{ text: text[i], style: { color: 'green', fontWeight: 'bold' } }
@@ -210,7 +200,6 @@ const GrokDebugger = () => {
 
 	const refreshGrokPatterns = (patterns) => {
 		loadedGrokPatterns.current = patterns
-		console.log("patterns: ", patterns)
 	}
 
 	const HandleShare = () => {
@@ -241,8 +230,6 @@ const GrokDebugger = () => {
 		setError('')
 		var ret = window.debugGrok(patternValue, inputValue)
 
-		console.log(ret)
-
 		var idx = ret["__idx"]
 		delete ret["__idx"]
 		var error = ret["__error"]
@@ -261,13 +248,6 @@ const GrokDebugger = () => {
 			var submatch_indexes = JSON.parse(ret["__submatches_idx"])
 			delete ret["__submatches_idx"]
 		}
-
-		console.log("idx => ", idx, " type => ", typeof idx)
-		console.log("ret => ", ret, " type => ", typeof ret)
-		console.log("error => ", error, " type => ", typeof error)
-		console.log("start_idx => ", start_idx, " type => ", typeof start_idx)
-		console.log("end_idx => ", end_idx, " type => ", typeof end_idx)
-		console.log("submatch indexes => ", submatch_indexes, " type => ", typeof submatch_indexes)
 
 		if (idx !== undefined) {
 			if (ret !== undefined) {
@@ -305,7 +285,6 @@ const GrokDebugger = () => {
 	};
 
 	const renderPatternEvaluationResults = () => {
-		console.log("evaled: ", evaled)
 		if (evaled.current === false) {
 			return null;
 		}

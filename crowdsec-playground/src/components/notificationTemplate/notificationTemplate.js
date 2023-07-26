@@ -17,7 +17,6 @@ function NotificationTemplate() {
 
 	const handleSubmit = () => {
 		let ret = window.formatAlert(alert, template)
-		console.log(ret)
 		if (ret.error !== undefined) {
 			setOutput(ret.error)
 		} else {

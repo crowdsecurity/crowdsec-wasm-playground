@@ -92,7 +92,11 @@ func validateGrok(this js.Value, args []js.Value) any {
 
 func debugGrok(this js.Value, args []js.Value) interface{} {
 	if len(args) != 2 {
-		return map[string]interface{}{"_error": "Invalid no of arguments passed"}
+		return map[string]interface{}{"__error": "Invalid no of arguments passed"}
+	}
+	_, err := Grok.Compile(args[0].String())
+	if err != nil {
+		return map[string]interface{}{"__error": err.Error()}
 	}
 	pattern := args[0].String()
 	input := args[1].String()
