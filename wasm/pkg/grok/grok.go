@@ -121,7 +121,7 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 
 	_, err := Grok.Compile(pattern)
 	if err != nil {
-		fmt.Printf("subpattern '%s' is INVALID: %s\n", pattern, err)
+		//fmt.Printf("subpattern '%s' is INVALID: %s\n", pattern, err)
 		return ret
 	}
 	ret.Compiles = true
