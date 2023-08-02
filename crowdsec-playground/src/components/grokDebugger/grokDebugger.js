@@ -116,7 +116,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		if (insubmatch === true) {
 			//console.log("in submatch %d", submatch_idx)
 			patternStyles.push(
-				{ text: pattern[i], style: { backgroundColor: render_hl_captured, color: render_text_color, fontFamily: render_family_font } }
+				{ text: pattern[i], style: { color: colorFromKey(submatch_name), fontFamily: render_family_font } }
 			)
 			continue
 		}
@@ -124,7 +124,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		//we're not in a submatch, but we're matched
 		//console.log("in match")
 		patternStyles.push(
-			{ text: pattern[i], style: { backgroundColor: render_hl_not_captured, color: render_text_color, fontFamily: render_family_font } }
+			{ text: pattern[i], style: { color: render_text_color, fontFamily: render_family_font } }
 		)
 	}
 	return patternStyles
@@ -157,7 +157,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 			if (i >= indexes[0] && i < indexes[1]) {
 				//console.log("char %d is part of submatch %s", i, k)
 				dataStyles.push(
-					{ text: text[i], style: { backgroundColor: render_hl_captured, fontFamily: 'Courier New, Courier, monospace' } }
+					{ text: text[i], style: { color: colorFromKey(k), fontFamily: 'Courier New, Courier, monospace' } }
 				)
 				continue nextchar
 			}
@@ -165,7 +165,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 		//console.log("char %d is not part of submatch", i)
 		//The char is matched, but not part of a submatch
 		dataStyles.push(
-			{ text: text[i], style: { color: render_text_color, backgroundColor: render_hl_not_captured, fontFamily: 'Courier New, Courier, monospace' } }
+			{ text: text[i], style: { color: render_text_color, fontFamily: 'Courier New, Courier, monospace' } }
 		)
 
 	}
