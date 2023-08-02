@@ -45,7 +45,33 @@ const GrokPatternExamples = {
 	}
 }
 
-var submatch_group_colors = ['#bc4b51', '#5b8e7d', '#f4a259', '#8cb369']
+const submatch_group_colors = [
+	"#F6C90E",  // Gold
+	"#4BCBFF",  // Sky Blue
+	"#FEB8C7",  // Pink
+	"#61D836",  // Green
+	"#9F64F4",  // Purple
+	"#FF815F",  // Coral
+	"#00D8CC",  // Teal
+	"#FFC56E",  // Peach
+	"#697689",  // Steel Blue
+	"#FF957F",  // Salmon
+	"#8AC926",  // Lime Green
+	"#FF5D73",  // Watermelon
+	"#9A77FF",  // Lavender
+	"#FFB088",  // Apricot
+	"#6D9DC5",  // Cerulean
+	"#FF75A0",  // Rose
+	"#3C8DAD",  // Indigo
+	"#FFAB58",  // Tangerine
+	"#5D9E23",  // Olive Green
+	"#BE99FF"   // Lilac
+];
+var render_text_color = "#D3D3D3"
+var render_family_font = 'Courier New, Courier, monospace'
+
+var render_hl_not_captured = "#87A26B"
+var render_hl_captured = "#395D15"
 
 function renderPattern(end_idx, pattern, submatch_idx) {
 	let patternStyles = []
@@ -63,7 +89,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		if (i > end_idx) {
 			//console.log("after pattern")
 			patternStyles.push(
-				{ text: pattern[i], style: { color: 'red', fontWeight: 'bold' } }
+				{ text: pattern[i], style: { color: 'render_text_color', fontFamily: render_family_font } }
 			)
 			continue
 		}
@@ -90,7 +116,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		if (insubmatch === true) {
 			//console.log("in submatch %d", submatch_idx)
 			patternStyles.push(
-				{ text: pattern[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(submatch_name) } }
+				{ text: pattern[i], style: { backgroundColor: render_hl_captured, color: render_text_color, fontFamily: render_family_font } }
 			)
 			continue
 		}
@@ -98,7 +124,7 @@ function renderPattern(end_idx, pattern, submatch_idx) {
 		//we're not in a submatch, but we're matched
 		//console.log("in match")
 		patternStyles.push(
-			{ text: pattern[i], style: { color: 'green', fontWeight: 'bold' } }
+			{ text: pattern[i], style: { backgroundColor: render_hl_not_captured, color: render_text_color, fontFamily: render_family_font } }
 		)
 	}
 	return patternStyles
@@ -121,7 +147,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 		//The char isn't matched
 		if (i < start_idx || i >= end_idx) {
 			dataStyles.push(
-				{ text: text[i], style: { color: 'red', fontWeight: 'bold' } }
+				{ text: text[i], style: { color: render_text_color } }
 			)
 			continue
 		}
@@ -131,7 +157,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 			if (i >= indexes[0] && i < indexes[1]) {
 				//console.log("char %d is part of submatch %s", i, k)
 				dataStyles.push(
-					{ text: text[i], style: { color: 'green', fontWeight: 'bold', backgroundColor: colorFromKey(k) } }
+					{ text: text[i], style: { backgroundColor: render_hl_captured, fontFamily: 'Courier New, Courier, monospace' } }
 				)
 				continue nextchar
 			}
@@ -139,7 +165,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 		//console.log("char %d is not part of submatch", i)
 		//The char is matched, but not part of a submatch
 		dataStyles.push(
-			{ text: text[i], style: { color: 'green', fontWeight: 'bold' } }
+			{ text: text[i], style: { color: render_text_color, backgroundColor: render_hl_not_captured, fontFamily: 'Courier New, Courier, monospace' } }
 		)
 
 	}
@@ -325,8 +351,8 @@ const GrokDebugger = () => {
 						<Table aria-label="simple table" size="small" width="50%">
 							<TableHead>
 								<TableRow>
-									<TableCell style={{ fontWeight: 'bold' }} align="right">{columns[0].title}</TableCell>
-									<TableCell style={{ fontWeight: 'bold' }} align="center">{columns[1].title}</TableCell>
+									<TableCell style={{ fontSize: "1.2em" }} align="right">{columns[0].title}</TableCell>
+									<TableCell style={{ fontSize: "1.2em" }} align="center">{columns[1].title}</TableCell>
 
 									{/* {columns.map((column) => (<TableCell style={{ fontWeight: 'bold'}} align="center">{column.title}</TableCell>))} */}
 								</TableRow>
@@ -337,8 +363,8 @@ const GrokDebugger = () => {
 									(key) => {
 										return key.value !== "";
 									}).map((row) => (<TableRow key={row.idx}>
-										<CustomTableCell color={row.color} style={{ color: '#444', fontWeight: 'bold' }} align="right">{row.pattern}</CustomTableCell>
-										<CustomTableCell color={row.color} style={{ color: '#444', fontWeight: 'bold' }} align="center">{row.value}</CustomTableCell>
+										<CustomTableCell style={{ color: row.color, fontFamily: render_family_font, fontSize: "1em" }} align="right">{row.pattern}</CustomTableCell>
+										<CustomTableCell style={{ color: row.color, fontFamily: render_family_font, fontSize: "1em" }} align="center">{row.value}</CustomTableCell>
 									</TableRow>))}
 							</TableBody>
 						</Table>
@@ -405,16 +431,16 @@ const GrokDebugger = () => {
 							style={{ textAlign: 'left' }}
 
 						/>
-						 <ButtonGroup>
-						 <IconButton color="primary" onClick={HandleClick} aria-label="Run" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-							<Settings sx={{ fontSize: 24 }} />
-							<Typography variant="button">Run</Typography>
-						</IconButton>
+						<ButtonGroup>
+							<IconButton color="primary" onClick={HandleClick} aria-label="Run" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+								<Settings sx={{ fontSize: 24 }} />
+								<Typography variant="button">Run</Typography>
+							</IconButton>
 
-						<IconButton color="secondary" onClick={HandleShare} aria-label="Share" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-							<Share sx={{ fontSize: 24 }} />
-							<Typography variant="button">Share</Typography>
-						</IconButton>
+							<IconButton color="secondary" onClick={HandleShare} aria-label="Share" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+								<Share sx={{ fontSize: 24 }} />
+								<Typography variant="button">Share</Typography>
+							</IconButton>
 						</ButtonGroup>
 						<Snackbar
 							open={open}
