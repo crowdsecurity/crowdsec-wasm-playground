@@ -9,7 +9,6 @@ import (
 	"syscall/js"
 
 	"github.com/crowdsecurity/grokky"
-	"github.com/davecgh/go-spew/spew"
 )
 
 var Grok grokky.Host
@@ -37,7 +36,6 @@ func grokInit(this js.Value, args []js.Value) interface{} {
 	}
 
 	for _, patternFile := range patternFiles {
-		fmt.Printf("loading pattern %s\n", patternFile.Name())
 		fd, err := f.Open("patterns/" + patternFile.Name())
 		if err != nil {
 			fmt.Printf("error while reading embedded pattern %s : %s\n", patternFile.Name(), err)
@@ -80,19 +78,13 @@ func validateGrok(this js.Value, args []js.Value) any {
 	return "ok boii"
 }
 
-//^toto %{IP:toto} foobar lol
-//toto 1.2.3.4 rarta
-//toto 1.2.3.4 foobar rara
-//toto 1.2.3.4 foobar lol
-//toto 1.2.3.4 foobar lol 42
-
-//^toto %{IP:toto} %{IP:foobar} tutu lol
-//toto 1.2.3.4 5.6.7.8 xxx
-//toto 1.2.3.4 5.6.7.8 tutu lol
-
 func debugGrok(this js.Value, args []js.Value) interface{} {
 	if len(args) != 2 {
-		return map[string]interface{}{"_error": "Invalid no of arguments passed"}
+		return map[string]interface{}{"__error": "Invalid no of arguments passed"}
+	}
+	_, err := Grok.Compile(args[0].String())
+	if err != nil {
+		return map[string]interface{}{"__error": err.Error()}
 	}
 	pattern := args[0].String()
 	input := args[1].String()
@@ -107,12 +99,6 @@ type PartialMatch struct {
 	SubMatchIndexes  map[string][]int
 	IdxStart, IdxEnd int
 }
-
-// type sortIdxArray interface {
-// 	Len() int
-// 	Less(i, j int) bool
-// 	Swap(i, j int)
-// }\
 
 type matchedIdxArray [][]int
 
@@ -135,7 +121,7 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 
 	_, err := Grok.Compile(pattern)
 	if err != nil {
-		fmt.Printf("subpattern '%s' is INVALID: %s\n", pattern, err)
+		//fmt.Printf("subpattern '%s' is INVALID: %s\n", pattern, err)
 		return ret
 	}
 	ret.Compiles = true
@@ -148,9 +134,8 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 			ret.IdxStart = loc[0]
 			ret.IdxEnd = loc[1]
 		} else {
-			fmt.Printf("wtf not 2 indexes ?\n")
+			fmt.Printf("unexpected: not 2 indexes ?\n")
 		}
-		fmt.Printf("'%s' matches (%d - %d)\n", pattern, ret.IdxStart, ret.IdxEnd)
 		tmp_capture := runtimeRx.Parse(input)
 		submatch_indexes := runtimeRx.FindStringSubmatchIndex(input)
 		//get the index map
@@ -158,12 +143,9 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 		for k, v := range tmp_capture {
 			ret.Match[k] = v
 		}
-		//fmt.Printf("full indexes : %v\n", submatch_indexes)
-		//fmt.Printf("submatch map : %v\n", submatch_map)
 		ret.SubMatchIndexes = map[string][]int{}
 		for k, vidx := range submatch_map {
 
-			//fmt.Printf("name (%s) ->  %d -> %v\n", k, vidx, submatch_indexes[vidx*2:vidx*2+2])
 			couple := []int{submatch_indexes[vidx*2], submatch_indexes[vidx*2+1]}
 			//there wasn't a match for this group
 			if couple[0] == -1 || couple[1] == -1 {
@@ -171,11 +153,8 @@ func isSubPattternOk(pattern string, input string) PartialMatch {
 			}
 			ret.SubMatchIndexes[k] = couple
 		}
-		//let's now sort the array of indexes
-		//sort.Sort(matchedIdxArray(ret.SubMatchIndexes))
 		return ret
 	}
-	fmt.Printf("'%s' does not match '%s'\n", pattern, input)
 	return ret
 
 }
@@ -188,10 +167,6 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 	idx := 0
 	prev_idx := 0
 	var prev_match = map[string]interface{}{}
-
-	//fmt.Printf("let's goooooo\n")
-	fmt.Printf("intput is '%s'\n", input)
-	fmt.Printf("pattern is '%s'\n", pattern)
 
 	for idx < len(pattern) {
 		//we got a break : space or '%{' or end of string
@@ -224,7 +199,6 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 
 				//we are at the last char of the pattern, we matched everything
 				if len(pattern) == idx+1 {
-					fmt.Printf("we matched everything idx=%d vs full lenght=%d\n", idx, len(pattern))
 					finalret["__idx"] = -1
 					return finalret
 				}
@@ -232,24 +206,19 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 				continue
 			} else {
 				//we cannot match, let's stop here and return the previous match
-				fmt.Printf("we cannot match (idx=%d / len=%d), let's continue and keep the previous match (prev_idx=%d)\n", idx, len(pattern), prev_idx)
 				idx++
 				continue
-				//return finalret
 			}
 		}
-		//fmt.Printf("idx=%d / len=%d\n", idx, len(pattern))
 		idx++
 	}
 
 	//we actually matched nothing
 	if prev_idx == 0 {
-		fmt.Printf("we matched nothing!\n")
 		finalret["__idx"] = 0
 		finalret["__error"] = "no match"
 		return finalret
 	}
-	fmt.Printf("we shouldn't be here .... \n")
 	return finalret
 
 }
@@ -265,7 +234,6 @@ func runGrok(this js.Value, args []js.Value) interface{} {
 	if err != nil {
 		return map[string]string{"error": err.Error()}
 	}
-	fmt.Printf("pattern '%s' : OK\n", pattern)
 
 	ret := runtimeRx.Parse(input)
 
@@ -273,13 +241,11 @@ func runGrok(this js.Value, args []js.Value) interface{} {
 	for k, v := range ret {
 		retiface[k] = v
 	}
-	fmt.Printf("result %s\n", spew.Sdump(retiface))
 	return retiface
 }
 
 func getGrokPatterns(this js.Value, args []js.Value) interface{} {
 	ret := map[string]interface{}{}
-	fmt.Printf("getGrokPatterns\n")
 	fmt.Printf("loaded %d patterns\n", len(Grok.Patterns))
 	for k, v := range Grok.Patterns {
 		ret[k] = v
