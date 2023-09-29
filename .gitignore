@@ -21,3 +21,6 @@
 go.work
 
 main.wasm
+
+crowdsec-playground/node_modules
+crowdsec-playground/build
