@@ -4,20 +4,17 @@ import "src/index.css";
 import App from "src/App";
 import Home from "src/components/Home";
 import reportWebVitals from "src/reportWebVitals";
-
-import {
-  createHashRouter,
-  createRoutesFromElements,
-  RouterProvider,
-  Route,
-} from "react-router-dom";
-
 import NotificationTemplate from "src/components/NotificationTemplate";
 import GrokDebugger from "src/components/GrokDebugger";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 
-const router = createHashRouter(
+const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index element={<Home />} />
@@ -29,15 +26,10 @@ const router = createHashRouter(
   ),
 );
 
-root.render(
-  <>
-    <RouterProvider router={router}>
-      <App />
-    </RouterProvider>
-  </>,
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
