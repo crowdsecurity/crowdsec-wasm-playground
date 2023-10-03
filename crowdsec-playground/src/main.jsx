@@ -8,20 +8,37 @@ import NotificationTemplate from "src/components/NotificationTemplate";
 import GrokDebugger from "src/components/GrokDebugger";
 
 import {
-  createBrowserRouter,
+  createHashRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
 } from "react-router-dom";
+import ErrorBoundary from "src/components/errorBoundary";
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      <Route index element={<Home />} />
-      <Route path="grok" element={<GrokDebugger />} />
-      <Route path="notifications" element={<NotificationTemplate />} />
-      <Route path="parser" element={<div>Not done</div>} />
-      <Route path="scenario" element={<div>Not done</div>} />
+      <Route index element={<Home />} errorElement={ErrorBoundary} />
+      <Route
+        path="grok"
+        element={<GrokDebugger />}
+        errorElement={ErrorBoundary}
+      />
+      <Route
+        path="notifications"
+        element={<NotificationTemplate />}
+        errorElement={ErrorBoundary}
+      />
+      <Route
+        path="parser"
+        element={<div>Not done</div>}
+        errorElement={ErrorBoundary}
+      />
+      <Route
+        path="scenario"
+        element={<div>Not done</div>}
+        errorElement={ErrorBoundary}
+      />
     </Route>,
   ),
 );

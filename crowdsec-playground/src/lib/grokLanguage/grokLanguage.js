@@ -1,7 +1,6 @@
-import { LRLanguage } from "@codemirror/language";
+import { LRLanguage, LanguageSupport } from "@codemirror/language";
 import { parser } from "./grok.js";
 import { styleTags, tags as t } from "@lezer/highlight";
-import { LanguageSupport } from "@codemirror/language";
 
 let parserWithMetadata = parser.configure({
   props: [

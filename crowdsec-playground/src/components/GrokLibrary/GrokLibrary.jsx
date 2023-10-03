@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   TableRow,
   TableCell,
@@ -23,7 +23,7 @@ import EditPattern from "src/components/GrokLibrary/EditPattern";
 import AddPattern from "src/components/GrokLibrary/AddPattern";
 
 const GrokLibrary = ({ onPatternUpdate }) => {
-  const [patterns] = useState(window.getGrokPatterns());
+  const [patterns, setPatterns] = useState(window.getGrokPatterns());
   const [search, setSearch] = useState("");
   const [patternsOpenState, setPatternsOpenState] = useState({});
   const [page, setPage] = useState(1);
@@ -63,17 +63,12 @@ const GrokLibrary = ({ onPatternUpdate }) => {
         console.log("Error adding pattern: ", ret.error);
         return [false, ret.error];
       }
-      this.setState(
-        (prevState) => ({
-          patterns: {
-            ...prevState.patterns,
-            [patternKey]: patternValue,
-          },
-        }),
-        () => {
-          onPatternUpdate(patterns);
-        },
-      );
+      console.log("patterns" + JSON.stringify(patterns));
+      console.log("Added pattern: ", patternKey, patternValue);
+      setPatterns((prevState) => ({
+        ...prevState.patterns,
+        [patternKey]: patternValue,
+      }));
     }
 
     return [true, ""];
@@ -85,15 +80,10 @@ const GrokLibrary = ({ onPatternUpdate }) => {
       console.log("Error editing pattern: ", ret.error);
       return [false, ret.error];
     }
-    this.setState(
-      (prevState) => ({
-        ...prevState,
-        [patternKey]: patternValue,
-      }),
-      () => {
-        onPatternUpdate(patterns);
-      },
-    );
+    setPatterns((prevState) => ({
+      ...prevState,
+      [patternKey]: patternValue,
+    }));
     return [true, ""];
   };
 
@@ -113,7 +103,7 @@ const GrokLibrary = ({ onPatternUpdate }) => {
 
   const currentPagePatternKeys = patternKeys.slice(
     (page - 1) * rowsPerPage,
-    page * rowsPerPage,
+    page * rowsPerPage
   );
 
   return (
@@ -139,7 +129,7 @@ const GrokLibrary = ({ onPatternUpdate }) => {
             </TableHead>
             <TableBody>
               {currentPagePatternKeys.map((key) => (
-                <>
+                <Fragment key={key}>
                   <TableRow
                     key={key}
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -196,7 +186,7 @@ const GrokLibrary = ({ onPatternUpdate }) => {
                       </Collapse>
                     </TableCell>
                   </TableRow>
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>

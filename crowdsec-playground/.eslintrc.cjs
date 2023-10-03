@@ -7,13 +7,13 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
     "plugin:prettier/recommended",
-    "plugin:import/recommended"
+    "plugin:import/recommended",
+    "plugin/import-resolver-alias"
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { 
     "react": { version: '18.2' } ,
-    "import/resolver": foo
   },
   plugins: ['react-refresh'],
   rules: {

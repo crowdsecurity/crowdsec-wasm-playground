@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -14,6 +13,7 @@ import { GitHub } from "@mui/icons-material";
 import CrowdSecLogo from "src/assets/crowdsec.svg?react";
 
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const drawerWidth = 240;
 
@@ -25,12 +25,12 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const pages = {
-  "Grok Debugger": "/grok",
-  "Notification Templates": "/notifications",
+  "Grok Debugger": "grok",
+  "Notification Templates": "notifications",
 };
 
 export default function ResponsiveAppBar() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -64,7 +64,7 @@ export default function ResponsiveAppBar() {
           >
             <MenuIcon />
           </IconButton>
-          <CrowdSecLogo className="appLogo"/>
+          <CrowdSecLogo className="appLogo" />
           <Typography
             variant="h6"
             noWrap

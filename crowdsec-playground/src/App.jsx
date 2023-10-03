@@ -29,17 +29,24 @@ const App = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const go = new window.Go();
-    fetch("main.wasm")
-      .then((response) => response.arrayBuffer())
-      .then((bytes) => WebAssembly.instantiate(bytes, go.importObject))
-      .then((result) => {
-        console.log("Go: ", go);
+    const loadWasm = async () => {
+      try {
+        const go = new Go();
+        const result = await WebAssembly.instantiateStreaming(
+          fetch("main.wasm"),
+          go.importObject,
+        );
         console.log("Result: ", result);
         go.run(result.instance);
         window.grokInit();
         setIsLoaded(true);
-      });
+      } catch (error) {
+        console.error("Problem loading wasm");
+        console.error(error);
+      }
+    };
+
+    loadWasm();
   }, []);
 
   return (

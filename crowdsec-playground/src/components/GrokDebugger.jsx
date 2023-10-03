@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import {
   Alert,
@@ -187,13 +187,13 @@ const CustomTableCell = styled(TableCell)(({ color }) => ({
 }));
 
 const GrokDebugger = () => {
-  const [outputDictValue, setOutputDictValue] = React.useState([]);
-  const [error, setError] = React.useState("");
-  const [grokStyles, setGrokStyles] = React.useState([]);
-  const [dataStyles, setDataStyles] = React.useState([]);
-  const [grokExample, setGrokExample] = React.useState("");
-  const [patternValue, setPatternValue] = React.useState("");
-  const [inputValue, setInputValue] = React.useState("");
+  const [outputDictValue, setOutputDictValue] = useState([]);
+  const [error, setError] = useState("");
+  const [grokStyles, setGrokStyles] = useState([]);
+  const [dataStyles, setDataStyles] = useState([]);
+  const [grokExample, setGrokExample] = useState("");
+  const [patternValue, setPatternValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   const loadedGrokPatterns = useRef({});
   const [open, setOpen] = useState(false);
@@ -265,6 +265,7 @@ const GrokDebugger = () => {
         console.error("Failed to copy data to clipboard:", error);
       });
   };
+
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -272,6 +273,7 @@ const GrokDebugger = () => {
 
     setOpen(false);
   };
+
   const handleClick = () => {
     evaled.current = true;
     setError("");
