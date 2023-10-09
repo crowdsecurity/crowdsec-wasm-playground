@@ -139,7 +139,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 		//The char isn't matched
 		if (i < start_idx || i >= end_idx) {
 			dataStyles.push(
-				{ text: text[i], style: { color: render_text_color } }
+				{ text: text[i], style: { color: render_text_color,  backgroundColor: "#CA3433" } }
 			)
 			continue
 		}
@@ -264,17 +264,21 @@ const GrokDebugger = () => {
 		delete ret["__idx_start"]
 		var end_idx = ret["__idx_end"]
 		delete ret["__idx_end"]
+		var fullmatch = ret["__fullmatch"]
+		delete ret["__fullmatch"]
 
 		if (error) {
 			setError(error)
 			return
+		}
+		if (fullmatch === false) {
+			setError("The pattern didn't match the input")
 		}
 
 		if ("__submatches_idx" in ret) {
 			var submatch_indexes = JSON.parse(ret["__submatches_idx"])
 			delete ret["__submatches_idx"]
 		}
-
 		if (idx !== undefined) {
 			if (ret !== undefined) {
 				//we want to have consistent order in the table, so we rely on the submatch_index to order the table.
