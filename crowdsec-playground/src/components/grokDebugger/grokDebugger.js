@@ -171,6 +171,7 @@ const CustomTableCell = styled(TableCell)(({ color }) => ({
 const GrokDebugger = () => {
 	const [outputDictValue, setOutputDictValue] = React.useState([]);
 	const [error, setError] = React.useState('');
+	const [warning, setWarning] = React.useState('');
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
@@ -254,6 +255,7 @@ const GrokDebugger = () => {
 	const HandleClick = () => {
 		evaled.current = true;
 		setError('')
+		setWarning('')
 		var ret = window.debugGrok(patternValue, inputValue)
 
 		var idx = ret["__idx"]
@@ -271,8 +273,9 @@ const GrokDebugger = () => {
 			setError("Error while trying to match: " + error)
 			return
 		}
+		console.log("fullmatch is ", fullmatch, " and is of type ", typeof fullmatch, " and is ", fullmatch === false)
 		if (fullmatch === false) {
-			setError("The pattern didn't completely match the input. Partial match is displayed below.")
+			setWarning("The pattern didn't completely match the input. Partial match is displayed below.")
 		}
 
 		if ("__submatches_idx" in ret) {
@@ -379,6 +382,7 @@ const GrokDebugger = () => {
 				<Item>
 					<div>
 						{error && <Alert severity="error">{error}</Alert>}
+						{warning && <Alert severity="warning">{warning}</Alert>}
 						<div align="left"><h1>Pattern</h1></div>
 						<CodeMirror
 							value={patternValue}
