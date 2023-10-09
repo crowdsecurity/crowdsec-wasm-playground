@@ -268,11 +268,11 @@ const GrokDebugger = () => {
 		delete ret["__fullmatch"]
 
 		if (error) {
-			setError(error)
+			setError("Error while trying to match: " + error)
 			return
 		}
 		if (fullmatch === false) {
-			setError("The pattern didn't match the input")
+			setError("The pattern didn't completely match the input. Partial match is displayed below.")
 		}
 
 		if ("__submatches_idx" in ret) {
@@ -378,7 +378,7 @@ const GrokDebugger = () => {
 			<Grid item xs={8} md={8}>
 				<Item>
 					<div>
-						{error && <Alert severity="error">An error occured while processing data: {error}.</Alert>}
+						{error && <Alert severity="error">{error}</Alert>}
 						<div align="left"><h1>Pattern</h1></div>
 						<CodeMirror
 							value={patternValue}
