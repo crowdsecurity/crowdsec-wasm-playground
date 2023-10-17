@@ -139,7 +139,7 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
 		//The char isn't matched
 		if (i < start_idx || i >= end_idx) {
 			dataStyles.push(
-				{ text: text[i], style: { color: render_text_color } }
+				{ text: text[i], style: { color: render_text_color,  backgroundColor: "#CA3433" } }
 			)
 			continue
 		}
@@ -171,6 +171,7 @@ const CustomTableCell = styled(TableCell)(({ color }) => ({
 const GrokDebugger = () => {
 	const [outputDictValue, setOutputDictValue] = React.useState([]);
 	const [error, setError] = React.useState('');
+	const [warning, setWarning] = React.useState('');
 	const [grokStyles, setGrokStyles] = React.useState([]);
 	const [dataStyles, setDataStyles] = React.useState([]);
 	const [grokExample, setGrokExample] = React.useState('')
@@ -254,6 +255,7 @@ const GrokDebugger = () => {
 	const HandleClick = () => {
 		evaled.current = true;
 		setError('')
+		setWarning('')
 		var ret = window.debugGrok(patternValue, inputValue)
 
 		var idx = ret["__idx"]
@@ -264,17 +266,22 @@ const GrokDebugger = () => {
 		delete ret["__idx_start"]
 		var end_idx = ret["__idx_end"]
 		delete ret["__idx_end"]
+		var fullmatch = ret["__fullmatch"]
+		delete ret["__fullmatch"]
 
 		if (error) {
-			setError(error)
+			setError("Error while trying to match: " + error)
 			return
+		}
+		console.log("fullmatch is ", fullmatch, " and is of type ", typeof fullmatch, " and is ", fullmatch === false)
+		if (fullmatch === false) {
+			setWarning("The pattern didn't completely match the input. Partial match is displayed below.")
 		}
 
 		if ("__submatches_idx" in ret) {
 			var submatch_indexes = JSON.parse(ret["__submatches_idx"])
 			delete ret["__submatches_idx"]
 		}
-
 		if (idx !== undefined) {
 			if (ret !== undefined) {
 				//we want to have consistent order in the table, so we rely on the submatch_index to order the table.
@@ -374,7 +381,8 @@ const GrokDebugger = () => {
 			<Grid item xs={8} md={8}>
 				<Item>
 					<div>
-						{error && <Alert severity="error">An error occured while processing data: {error}.</Alert>}
+						{error && <Alert severity="error">{error}</Alert>}
+						{warning && <Alert severity="warning">{warning}</Alert>}
 						<div align="left"><h1>Pattern</h1></div>
 						<CodeMirror
 							value={patternValue}
