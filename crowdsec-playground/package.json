@@ -22,6 +22,7 @@
     "@mui/material": "^5.13.2",
     "@uiw/react-codemirror": "^4.21.3",
     "codemirror": "^6.0.1",
+    "deep-equal": "^2.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.2",

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useRef } from "react";
 import {
   TableRow,
   TableCell,
@@ -16,23 +16,21 @@ import {
   Paper,
   TableBody,
 } from "@mui/material";
+import deepEqual from "deep-equal";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import EditPattern from "src/components/GrokLibrary/EditPattern";
 import AddPattern from "src/components/GrokLibrary/AddPattern";
 
-const GrokLibrary = ({ onPatternUpdate }) => {
+const GrokLibrary = () => {
   const [patterns, setPatterns] = useState(window.getGrokPatterns());
   const [currentPagePatternKeys, setCurrentPagePatternKeys] = useState([]);
   const [search, setSearch] = useState("");
+  const prevSearch = useRef(search);
   const [patternsOpenState, setPatternsOpenState] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  useEffect(() => {
-    onPatternUpdate(patterns);
-  }, [onPatternUpdate, patterns]);
 
   const updateSearch = (event) => {
     setSearch(event.target.value);
@@ -65,7 +63,6 @@ const GrokLibrary = ({ onPatternUpdate }) => {
         };
       });
     }
-
     return [true, ""];
   };
 
@@ -88,27 +85,35 @@ const GrokLibrary = ({ onPatternUpdate }) => {
   };
 
   useEffect(() => {
-    if (search === "") {
-      setPatterns(() => window.getGrokPatterns());
-    } else {
-      setPatterns(() => {
-        let filteredPatterns = {};
-        for (let key in patterns) {
-          if (key.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
-            filteredPatterns[key] = patterns[key];
+    if (prevSearch.current !== search) {
+      if (search === "") {
+        console.log("toto");
+        setPatterns(() => window.getGrokPatterns());
+        prevSearch.current = search;
+      } else {
+        setPatterns(() => {
+          let filteredPatterns = {};
+          for (let key in patterns) {
+            if (key.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
+              filteredPatterns[key] = patterns[key];
+            }
           }
-        }
-        return filteredPatterns;
-      });
+          prevSearch.current = search;
+          return filteredPatterns;
+        });
+      }
     }
   }, [patterns, search]);
 
   useEffect(() => {
-    setCurrentPagePatternKeys(
-      Object.keys(patterns)
+    setCurrentPagePatternKeys((prevPagePatternKeys) => {
+      const newPagePatternKeys = Object.keys(patterns)
         .sort()
-        .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage),
-    );
+        .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+      return deepEqual(prevPagePatternKeys, newPagePatternKeys)
+        ? prevPagePatternKeys
+        : newPagePatternKeys;
+    });
   }, [currentPage, patterns, rowsPerPage]);
 
   return (

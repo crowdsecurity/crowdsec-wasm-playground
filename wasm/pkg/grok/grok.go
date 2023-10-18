@@ -212,7 +212,11 @@ func subdebugGrok(input string, pattern string) map[string]interface{} {
 		}
 		idx++
 	}
-
+	if finalret["__idx_end"] == len(input)-1 {
+		finalret["__fullmatch"] = true
+	} else {
+		finalret["__fullmatch"] = false
+	}
 	//we actually matched nothing
 	if prev_idx == 0 {
 		finalret["__idx"] = 0

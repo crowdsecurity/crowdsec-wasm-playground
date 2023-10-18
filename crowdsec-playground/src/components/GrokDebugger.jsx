@@ -153,7 +153,10 @@ function renderText(start_idx, end_idx, submatch_idx, text) {
   nextchar: for (let i = 0; i < text.length; i++) {
     //The char isn't matched
     if (i < start_idx || i >= end_idx) {
-      dataStyles.push({ text: text[i], style: { color: render_text_color } });
+      dataStyles.push({
+        text: text[i],
+        style: { color: render_text_color, backgroundColor: "#CA3433" },
+      });
       continue;
     }
     //Is the char part of a submatch ?
@@ -189,6 +192,7 @@ const CustomTableCell = styled(TableCell)(({ color }) => ({
 const GrokDebugger = () => {
   const [outputDictValue, setOutputDictValue] = useState([]);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [grokStyles, setGrokStyles] = useState([]);
   const [dataStyles, setDataStyles] = useState([]);
   const [grokExample, setGrokExample] = useState("");
@@ -277,6 +281,7 @@ const GrokDebugger = () => {
   const handleClick = () => {
     evaled.current = true;
     setError("");
+    setWarning("");
     const ret = window.debugGrok(patternValue, inputValue);
 
     const idx = ret["__idx"];
@@ -287,10 +292,26 @@ const GrokDebugger = () => {
     delete ret["__idx_start"];
     const end_idx = ret["__idx_end"];
     delete ret["__idx_end"];
+    const fullmatch = ret["__fullmatch"];
+    delete ret["__fullmatch"];
 
     if (error) {
-      setError(error);
+      setError("Error while trying to match: " + error);
       return;
+    }
+
+    console.log(
+      "fullmatch is ",
+      fullmatch,
+      " and is of type ",
+      typeof fullmatch,
+      " and is ",
+      fullmatch === false,
+    );
+    if (fullmatch === false) {
+      setWarning(
+        "The pattern didn't completely match the input. Partial match is displayed below.",
+      );
     }
 
     if ("__submatches_idx" in ret) {
@@ -437,11 +458,8 @@ const GrokDebugger = () => {
       <Grid item xs={8} md={8}>
         <Item>
           <div>
-            {error && (
-              <Alert severity="error">
-                An error occurred while processing data: {error}.
-              </Alert>
-            )}
+            {error && <Alert severity="error">{error}</Alert>}
+            {warning && <Alert severity="warning">{warning}</Alert>}
             <div>
               <h1>Pattern</h1>
             </div>
