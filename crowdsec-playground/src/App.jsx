@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 import CircularProgress from "@mui/material/CircularProgress";
-import ResponsiveAppBar from "src/components/Header";
+import ResponsiveAppBar from "./components/Header";
 import { createTheme, ThemeProvider, Box } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 

@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "src/index.css";
-import App from "src/App";
-import Home from "src/components/Home";
-import reportWebVitals from "src/reportWebVitals";
-import NotificationTemplate from "src/components/NotificationTemplate";
-import GrokDebugger from "src/components/GrokDebugger";
+import "./index.css";
+import App from "./App";
+import Home from "./components/Home";
+import reportWebVitals from "./reportWebVitals";
+import NotificationTemplate from "./components/NotificationTemplate";
+import GrokDebugger from "./components/GrokDebugger";
 
 import {
   createHashRouter,
@@ -13,7 +13,7 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import ErrorBoundary from "src/components/errorBoundary";
+import ErrorBoundary from "./components/errorBoundary";
 
 const router = createHashRouter(
   createRoutesFromElements(

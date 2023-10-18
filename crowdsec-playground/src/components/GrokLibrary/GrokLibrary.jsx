@@ -24,9 +24,10 @@ import AddPattern from "src/components/GrokLibrary/AddPattern";
 
 const GrokLibrary = ({ onPatternUpdate }) => {
   const [patterns, setPatterns] = useState(window.getGrokPatterns());
+  const [currentPagePatternKeys, setCurrentPagePatternKeys] = useState([]);
   const [search, setSearch] = useState("");
   const [patternsOpenState, setPatternsOpenState] = useState({});
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
@@ -38,8 +39,6 @@ const GrokLibrary = ({ onPatternUpdate }) => {
   };
 
   const handleOpen = (key) => {
-    console.log("Opening ", key);
-    console.log("State: ", patternsOpenState);
     setPatternsOpenState((prevState) => ({
       ...prevState,
       [key]: true,
@@ -47,9 +46,6 @@ const GrokLibrary = ({ onPatternUpdate }) => {
   };
 
   const handleClose = (key) => {
-    console.log("Closing ", key);
-    console.log("State: ", patternsOpenState);
-
     setPatternsOpenState((prevState) => ({
       ...prevState,
       [key]: false,
@@ -60,15 +56,14 @@ const GrokLibrary = ({ onPatternUpdate }) => {
     if (patternKey && patternValue) {
       let ret = window.addPattern(patternKey, patternValue);
       if (ret.error !== undefined) {
-        console.log("Error adding pattern: ", ret.error);
         return [false, ret.error];
       }
-      console.log("patterns" + JSON.stringify(patterns));
-      console.log("Added pattern: ", patternKey, patternValue);
-      setPatterns((prevState) => ({
-        ...prevState.patterns,
-        [patternKey]: patternValue,
-      }));
+      setPatterns((prevState) => {
+        return {
+          ...prevState.patterns,
+          [patternKey]: patternValue,
+        };
+      });
     }
 
     return [true, ""];
@@ -80,31 +75,41 @@ const GrokLibrary = ({ onPatternUpdate }) => {
       console.log("Error editing pattern: ", ret.error);
       return [false, ret.error];
     }
-    setPatterns((prevState) => ({
-      ...prevState,
-      [patternKey]: patternValue,
-    }));
+    setPatterns(() => window.getGrokPatterns());
     return [true, ""];
   };
 
   const handlePageChange = (event, page) => {
-    setPage(page);
+    setCurrentPage(page);
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
   };
 
-  let patternKeys = Object.keys(patterns)
-    .filter((key) => {
-      return key.toLowerCase().indexOf(search.toLowerCase()) !== -1;
-    })
-    .sort();
+  useEffect(() => {
+    if (search === "") {
+      setPatterns(() => window.getGrokPatterns());
+    } else {
+      setPatterns(() => {
+        let filteredPatterns = {};
+        for (let key in patterns) {
+          if (key.toLowerCase().indexOf(search.toLowerCase()) !== -1) {
+            filteredPatterns[key] = patterns[key];
+          }
+        }
+        return filteredPatterns;
+      });
+    }
+  }, [patterns, search]);
 
-  const currentPagePatternKeys = patternKeys.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
+  useEffect(() => {
+    setCurrentPagePatternKeys(
+      Object.keys(patterns)
+        .sort()
+        .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage),
+    );
+  }, [currentPage, patterns, rowsPerPage]);
 
   return (
     <div>
@@ -194,8 +199,8 @@ const GrokLibrary = ({ onPatternUpdate }) => {
       </TableContainer>
       <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
         <Pagination
-          count={Math.ceil(patternKeys.length / rowsPerPage)}
-          page={page}
+          count={Math.ceil(Object.keys(patterns).length / rowsPerPage)}
+          page={currentPage}
           onChange={handlePageChange}
         />
         Number of items per page:

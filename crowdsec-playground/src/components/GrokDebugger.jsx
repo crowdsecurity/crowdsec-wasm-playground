@@ -20,13 +20,13 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import Item from "@mui/material/Grid";
-import GrokLibrary from "src/components/GrokLibrary/GrokLibrary";
-import RichTextDisplay from "src/components/RichTextDisplay";
+import GrokLibrary from "./GrokLibrary/GrokLibrary";
+import RichTextDisplay from "./RichTextDisplay";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import { Share, Settings } from "@mui/icons-material";
 
-import { grokLanguage } from "src/lib/grokLanguage/grokLanguage";
+import { grokLanguage } from "../lib/grokLanguage/grokLanguage";
 
 import CodeMirror from "@uiw/react-codemirror";
 import { EditorView } from "codemirror";
@@ -307,8 +307,8 @@ const GrokDebugger = () => {
         });
 
         let data = [];
-        for (let i = 0; i < mykeys.length; i++) {
-          let key = mykeys[i];
+        for (const element of mykeys) {
+          let key = element;
           data.push({
             pattern: key,
             value: ret[key],
@@ -375,8 +375,6 @@ const GrokDebugger = () => {
                   <TableCell style={{ fontSize: "1.2em" }} align="center">
                     {columns[1].title}
                   </TableCell>
-
-                  {/* {columns.map((column) => (<TableCell style={{ fontWeight: 'bold'}} align="center">{column.title}</TableCell>))} */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -459,10 +457,7 @@ const GrokDebugger = () => {
                   activateOnTyping: true,
                 }),
                 EditorState.changeFilter.of((tr) => {
-                  if (tr.newDoc.sliceString(0).split("\n").length > 1) {
-                    return false;
-                  }
-                  return true;
+                  return tr.newDoc.sliceString(0).split("\n").length <= 1;
                 }),
               ]}
               basicSetup={{ autocompletion: true }}
@@ -478,10 +473,7 @@ const GrokDebugger = () => {
               extensions={[
                 EditorView.lineWrapping,
                 EditorState.changeFilter.of((tr) => {
-                  if (tr.newDoc.sliceString(0).split("\n").length > 1) {
-                    return false;
-                  }
-                  return true;
+                  return tr.newDoc.sliceString(0).split("\n").length <= 1;
                 }),
               ]}
               style={{ textAlign: "left" }}
