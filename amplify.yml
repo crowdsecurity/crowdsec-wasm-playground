@@ -4,16 +4,17 @@ frontend:
     preBuild:
       commands:
         #install go 1.20
-        - wget https://golang.org/dl/go1.20.6.linux-amd64.tar.gz
+        - wget -q https://golang.org/dl/go1.20.6.linux-amd64.tar.gz
         - rm -rf /usr/local/go && tar -C /usr/local -xzf go1.20.6.linux-amd64.tar.gz
     build:
       commands:
         - export PATH=$PATH:/usr/local/go/bin
         - cd ./wasm && GOOS=js GOARCH=wasm go build -o ../crowdsec-playground/public/main.wasm && cd ..
-        - cd ./crowdsec-playground && npm ci && npm run build && cd ..
+        - cd ./crowdsec-playground && cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./public/wasm_exec.cjs
+        - npm ci && npm run build && cd ..
   artifacts:
-    baseDirectory: crowdsec-playground/build
+    baseDirectory: crowdsec-playground/dist
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths: []
